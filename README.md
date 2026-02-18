@@ -16,5 +16,5 @@ See instructions. Delete this line and place instructions to download, configure
 
 ## Task boards 
 
-[Task Board](https://github.com/orgs/swe-students-spring2026/projects/10)
-Link To Task Board: https://github.com/orgs/swe-students-spring2026/projects/10
+[Task Board](https://github.com/orgs/swe-students-spring2026/projects/10)<br>
+Link To Task Board: https://github.com/orgs/swe-students-spring2026/projects/10<br>
