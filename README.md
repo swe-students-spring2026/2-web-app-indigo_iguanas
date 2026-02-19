@@ -23,13 +23,25 @@ A simple mobile first habit tracker that helps users build small daily habits an
 
 7. As a user, I want to see my current streak and past completion history so that I can visualize my consistency and stay motivated.
 
+8. As a user, I want to search for a specific habit so that I can quickly find it without scrolling through my entire list.
 
+9. As a user, I want to view my habits on a dashboard so that I can easily see what I need to complete today.
 
+10. As a user, I want to view my profile with my completed habits and streak statistics so that I can track my long term progress.
 
 
 ## Steps necessary to run the software
 
-See instructions. Delete this line and place instructions to download, configure, and run the software here.
+### 1. Clone the Repository
+Run:
+git clone https://github.com/swe-students-spring2026/2-web-app-indigo_iguanas.git
+cd 2-web-app-indigo_iguanas
+
+### 2. Install Python
+Make sure Python 3.10 or higher is installed.
+Verify by running:
+python3 --version
+
 
 ## Task boards 
 
