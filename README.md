@@ -32,7 +32,16 @@ A simple mobile first habit tracker that helps users build small daily habits an
 
 ## Steps necessary to run the software
 
-See instructions. Delete this line and place instructions to download, configure, and run the software here.
+### 1. Clone the Repository
+Open a terminal and run:
+git clone https://github.com/swe-students-spring2026/2-web-app-indigo_iguanas.git
+cd 2-web-app-indigo_iguanas
+
+### 2. Install Python
+Ensure Python 3.10 or higher is installed on your machine.
+You can verify this by running:
+python3 --version
+
 
 ## Task boards 
 
