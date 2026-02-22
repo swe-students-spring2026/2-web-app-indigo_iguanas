@@ -15,9 +15,6 @@ DbName = os.getenv('MONGO_DBNAME')
 client = pymongo.MongoClient(mongoURI)
 db = client[DbName]
 
-print("URI: ", mongoURI) #debugging purposes
-print("DB Name: ", DbName)
-
 users = db['users']
 habits = db['habits']
 
