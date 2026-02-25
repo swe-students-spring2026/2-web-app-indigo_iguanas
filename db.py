@@ -1,16 +1,18 @@
-import pymongo
-from bson.objectid import ObjectId
-import datetime
-
 import os
+import datetime
+import pymongo
 from dotenv import load_dotenv
 
-load_dotenv()
+# loading .env from same folder as the file
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-#remember to use 
 
 mongoURI = os.getenv('MONGO_URI')
 DbName = os.getenv('MONGO_DBNAME')
+
+if not mongoURI or not DbName:
+    raise RuntimeError("Missing URI or DBName")
 
 client = pymongo.MongoClient(mongoURI)
 db = client[DbName]
@@ -19,11 +21,11 @@ users = db['users']
 habits = db['habits']
 
 test = True
-if test: 
+
+if __name__ == "__main__" and test: 
 
     user = users.insert_one({
         'username': "test_user",
-        #"username", unique=True : for unique usernames
         'email': "test_user@nyu.edu"
     })
 
@@ -36,7 +38,6 @@ if test:
         'frequency': "Daily",
         'created_at': datetime.datetime.now(),
     })
-    
+
     print("Inserted User ID: ", userID)
     print("Inserted Habit ID: ", habit.inserted_id)
-
