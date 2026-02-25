@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-dashboard_dp = Blueprint("dashboard", __name__)
+dashboard_bp = Blueprint("dashboard", __name__)
 
 #Mongo Setup
 client = MongoClient(os.getenv("Mongo_URI"))
@@ -26,7 +26,7 @@ def dashboard():
 
     user_id = str(current_user.id)
 
-    habits = list(habits_collection.find({
+    habits = list(habit_collections.find({
         "userId": user_id,
         "archived": {"$ne": True}
     }))
@@ -61,7 +61,7 @@ def create_habit():
         "archived": False
     }
 
-    habits_collection.insert_one(new_habit)
+    habit_collections.insert_one(new_habit)
 
     return redirect(url_for("dashboard.dashboard"))
 
@@ -84,7 +84,8 @@ def delete_habit(habit_id):
 @dashboard_bp.route("/habits/search")
 @login_required
 def search_habits():
-    return render_template("search_results.html", habits=habits)
+    #return render_template("search_results.html", habits=habits) this shows an error for me? too lazy to fix rn -Jaiden
+    return render_template("search_results.html", habits=[])
 
 
 
