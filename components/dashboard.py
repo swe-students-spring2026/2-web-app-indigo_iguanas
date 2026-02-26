@@ -2,6 +2,8 @@ from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from pymongo import MongoClient
 from datetime import datetime
+from bson.objectid import ObjectId
+from bson.errors import InvalidId
 import os
 from dotenv import load_dotenv
 
@@ -81,13 +83,51 @@ def view_habits():
     
     return render_template('habits.html', habits=habits)
 
-
-
-
 # Toggle Completion
 
 
-# Edit Habit
+# Edit Habit 
+@dashboard_bp.route("/edithabit/<habit_id>", methods=["GET","POST"])
+@login_required
+def edit_habit(habit_id):
+    user_id = str(current_user.id)
+
+    try:
+        oid = ObjectId(habit_id)
+    except InvalidId:
+        return redirect(url_for("dashboard.viewhabits"))
+
+    habit = habit_collections.find_one({
+        "_id": oid,
+        "userId": user_id
+    })
+
+    if not habit:
+        return redirect(url_for("dashboard.viewhabits"))
+    
+    if request.method == "POST":
+        data = request.form
+
+        name = (data.get("name") or "").strip()
+
+        updated_fields = {
+            "name":name,
+            "frequency":data.get("frequency") or habit.get('frequency', 'daily'),
+            'updatedAt':datetime.utcnow()
+        }
+
+        if not updated_fields["name"]:
+            return render_template("edithabit.html", habit=habit, error="name is required")
+
+        habit_collections.update_one(
+            {"_id": oid, "userId": user_id},
+            {"$set":updated_fields}
+        )
+        return redirect(url_for("dashboard.viewhabits"))
+    
+    habit["_id"] = str(habit["_id"])
+    return render_template("edithabit.html", habit=habit)
+
 
 # Delete Habit 
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
@@ -100,7 +140,12 @@ def delete_habit(habit_id):
 @login_required
 def search_habits():
     #return render_template("search_results.html", habits=habits) this shows an error for me? too lazy to fix rn -Jaiden
-    return render_template("search_results.html", habits=[])
+    return render_template("search_results.html", habits=[]) 
+
+# View Habits 
+
+
+# Edit Habits
 
 
 
