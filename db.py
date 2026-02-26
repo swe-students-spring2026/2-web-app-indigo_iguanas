@@ -9,14 +9,15 @@ load_dotenv()
 
 #remember to use 
 
-mongoURI = os.getenv('MONGO_URI')
-DbName = os.getenv('MONGO_DBNAME')
+mongo_uri = os.getenv("MONGO_URI")
+db_name = os.getenv("MONGO_DBNAME")
 
-client = pymongo.MongoClient(mongoURI)
-db = client[DbName]
+client = MongoClient(mongo_uri)
+db = client[db_name]
 
-users = db['users']
-habits = db['habits']
+users_collection = db["users"]
+habits_collection = db["habits"]
+completions_collection = db["completions"]
 
 test = True
 if test: 
