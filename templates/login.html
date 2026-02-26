@@ -1,1 +1,30 @@
-<header> Login Page</header>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Login</title>
+    </head>
+
+    <body>
+        <h1>Login</h1>
+        
+        <form method="POST" action="/login">
+            <div>
+                <label for="username">Username</label>
+                <input id="username" name="username" type="text" required/>
+            </div>
+
+            <div>
+                <label for=""password>password</label>
+                <input id="password" name="password" type="password" required/>
+            </div>
+
+            <button type="submit"> Sign In</button>
+        </form>
+        
+        <p> 
+            Don't have an account? 
+            <a href="/register">Register</a>
+        </p>
+    </body>
+</html>
