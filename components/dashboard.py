@@ -5,10 +5,10 @@ from bson.objectid import ObjectId
 from datetime import datetime
 import os
 from dotenv import load_dotenv
-
+from datetime import timedelta
 load_dotenv()
 
-dashboard_dp = Blueprint("dashboard", __name__)
+dashboard_bp = Blueprint("dashboard", __name__)
 
 #Mongo Setup
 client = MongoClient(os.getenv("Mongo_URI"))
@@ -18,15 +18,16 @@ completions_collection = db["completions"]
 
 #Dashboard view 
 @dashboard_bp.route("/dashboard")
-@login_required
+#@login_required
 def dashboard():
     """
     Displays today's habits for the logged in user.
     """
 
-    user_id = str(current_user.id)
+    # FOR LATER USE user_id = str(current_user.id)
+    user_id = "testuser"
 
-    habits = list(habits_collection.find({
+    habits = list(habit_collections.find({
         "userId": user_id,
         "archived": {"$ne": True}
     }))
@@ -49,7 +50,7 @@ def dashboard():
 
 # Create Habit
 @dashboard_bp.route("/habits", methods=["POST"])
-@login_required
+#@login_required
 def create_habit():
     data = request.form
 
@@ -61,8 +62,7 @@ def create_habit():
         "archived": False
     }
 
-    habits_collection.insert_one(new_habit)
-
+    habit_collections.insert_one(new_habit)
     return redirect(url_for("dashboard.dashboard"))
 
 
@@ -93,7 +93,7 @@ def calculate_streak(habit_id, user_id):
     
     #Calculates consecutive daily streak ending today.
 
-    today = datetime.utcnow().date()
+    today = today - timedelta(days=1)
     streak = 0
 
     while True:
