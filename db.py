@@ -22,7 +22,7 @@ habits = db['habits']
 
 test = True
 
-if __name__ == "__main__" and test: 
+if __name__ == "__main__" and test:
 
     user = users.insert_one({
         'username': "test_user",
@@ -41,3 +41,4 @@ if __name__ == "__main__" and test:
 
     print("Inserted User ID: ", userID)
     print("Inserted Habit ID: ", habit.inserted_id)
+    

@@ -29,12 +29,11 @@ def app():
     def loadUser(user_id):
         id = users.find_one({"_id": ObjectId(user_id)})
         return id
-    
+
     #catching errors
     # @app.errorhandler(Exception)
     # def handle_exception(e):
-    #     return render_template("error.html", error=e)
-    
+    # return render_template("error.html", error=e)
     #for login stuff
     class User(UserMixin):
         pass
@@ -50,7 +49,7 @@ def app():
 
         username = request.form.get("username")
         password = request.form.get("password")
-    
+
         existingUser = users.find_one({"username": username})
         if existingUser and existingUser["password"] == password:
             user = User()
@@ -71,11 +70,11 @@ def app():
 
 app_instance = app()
 
-#I have no idea what this is but it seems necessary 
+#I have no idea what this is but it seems necessary
 #lowk copy pasted professors code from example app
 if __name__ == "__main__":
     FLASK_PORT = int(os.getenv("FLASK_PORT", "5000"))
     FLASK_ENV = os.getenv("FLASK_ENV")
     print(f"FLASK_ENV: {FLASK_ENV}, FLASK_PORT: {FLASK_PORT}")
-    
+
     app_instance.run(port=FLASK_PORT)
