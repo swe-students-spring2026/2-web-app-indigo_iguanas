@@ -3,7 +3,7 @@ from flask_login import LoginManager
 from components.dashboard import dashboard_bp
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"
+app.secret_key 
 
 # Register Blueprint
 app.register_blueprint(dashboard_bp)

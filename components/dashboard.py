@@ -76,16 +76,16 @@ def create_habit():
 
 # Delete Habit 
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
-@login_required
+#@login_required
 def delete_habit(habit_id):
     return redirect(url_for("dashboard.dashboard"))
 
 # Search Habit 
 @dashboard_bp.route("/habits/search")
-@login_required
+#@login_required
 def search_habits():
-    return render_template("search_results.html", habits=habits)
-
+    #SAFE FOR LATER return render_template("search_results.html", habits=habits)
+    return "Search not implemented yet"
 
 
 # Streak Calculations 
@@ -93,7 +93,7 @@ def calculate_streak(habit_id, user_id):
     
     #Calculates consecutive daily streak ending today.
 
-    today = today - timedelta(days=1)
+    today = datetime.now().date()
     streak = 0
 
     while True:
