@@ -3,7 +3,7 @@ Dashboard blueprints and routes for the Web App: Microhabit
 '''
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from pymongo import MongoClient
@@ -16,7 +16,7 @@ load_dotenv()
 dashboard_bp = Blueprint("dashboard", __name__)
 
 #Mongo Setup
-client = MongoClient(os.getenv("Mongo_URI"))
+client = MongoClient(os.getenv("MONGO_URI"))
 db = client["microhabit"]
 habit_collections = db["habits"]
 completions_collection = db["completions"]
@@ -72,14 +72,14 @@ def create_habit():
 
 
 # Create Habit Get
-@dashboard_bp.route("/createhabits", method={"GET"})
+@dashboard_bp.route("/createhabits", methods=["GET"])
 @login_required
-def view_habits():
+def create_habit_get():
     user_id = str(current_user.id)
 
     habits = list(habit_collections.find({
         "userId": user_id,
-        "archived": {"ne": True}
+        "archived": {"$ne": True}
     }))
 
     for h in habits:
@@ -90,7 +90,7 @@ def view_habits():
 # Toggle Completion
 
 
-# Edit Habit 
+# Edit Habit
 @dashboard_bp.route("/edithabit/<habit_id>", methods=["GET","POST"])
 @login_required
 def edit_habit(habit_id):
@@ -133,13 +133,13 @@ def edit_habit(habit_id):
     return render_template("edithabit.html", habit=habit)
 
 
-# Delete Habit 
+# Delete Habit
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
 @login_required
 def delete_habit(habit_id):
     return redirect(url_for("dashboard.dashboard"))
 
-# Search Habit 
+# Search Habit
 @dashboard_bp.route("/habits/search")
 @login_required
 def search_habits():
@@ -152,7 +152,7 @@ def search_habits():
 
 
 
-# Streak Calculations 
+# Streak Calculations
 def calculate_streak(habit_id, user_id):
 
     #Calculates consecutive daily streak ending today.
@@ -171,7 +171,7 @@ def calculate_streak(habit_id, user_id):
 
         if exists:
             streak += 1
-            today = today.replace(day=today.day - 1)
+            today = today - timedelta(days=1)
         else:
             break
 
