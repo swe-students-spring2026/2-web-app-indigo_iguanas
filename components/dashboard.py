@@ -1,7 +1,6 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from pymongo import MongoClient
-from bson.objectid import ObjectId
 from datetime import datetime
 import os
 from dotenv import load_dotenv
@@ -47,8 +46,8 @@ def dashboard():
 
     return render_template("dashboard.html", habits=habits)
 
-# Create Habit
-@dashboard_bp.route("/habits", methods=["POST"])
+# Create Habit Post
+@dashboard_bp.route("/createhabits", methods=["POST"])
 @login_required
 def create_habit():
     data = request.form
@@ -66,7 +65,23 @@ def create_habit():
     return redirect(url_for("dashboard.dashboard"))
 
 
-# Create Habit
+# Create Habit Get
+@dashboard_bp.route("/createhabits", method={"GET"})
+@login_required
+def view_habits():
+    user_id = str(current_user.id)
+
+    habits = list(habit_collections.find({
+        "userId": user_id,
+        "archived": {"ne": True}
+    }))
+
+    for h in habits:
+        h['_id'] = str(h['_id'])
+    
+    return render_template('habits.html', habits=habits)
+
+
 
 
 # Toggle Completion
