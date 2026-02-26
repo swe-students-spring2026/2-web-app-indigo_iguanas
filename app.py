@@ -27,8 +27,14 @@ def app():
     #load in user id after login
     @login_manager.user_loader
     def loadUser(user_id):
-        id = users.find_one({"_id": ObjectId(user_id)})
-        return id
+        existing = users.find_one({"_id": ObjectId(user_id)})
+        if not existing:
+            return None
+        user = User()
+        user.id = str(existing("_id"))
+        user.username = existing.get("username")
+        return user
+
 
     #catching errors
     # @app.errorhandler(Exception)
