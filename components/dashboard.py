@@ -1,10 +1,14 @@
+'''
+Dashboard blueprints and routes for the Web App: Microhabit 
+'''
+
+import os
+from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from pymongo import MongoClient
-from datetime import datetime
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,7 +21,7 @@ db = client["microhabit"]
 habit_collections = db["habits"]
 completions_collection = db["completions"]
 
-#Dashboard view 
+#Dashboard view
 @dashboard_bp.route("/dashboard")
 @login_required
 def dashboard():
@@ -80,7 +84,7 @@ def view_habits():
 
     for h in habits:
         h['_id'] = str(h['_id'])
-    
+
     return render_template('habits.html', habits=habits)
 
 # Toggle Completion
@@ -104,7 +108,7 @@ def edit_habit(habit_id):
 
     if not habit:
         return redirect(url_for("dashboard.viewhabits"))
-    
+
     if request.method == "POST":
         data = request.form
 
@@ -124,7 +128,7 @@ def edit_habit(habit_id):
             {"$set":updated_fields}
         )
         return redirect(url_for("dashboard.viewhabits"))
-    
+
     habit["_id"] = str(habit["_id"])
     return render_template("edithabit.html", habit=habit)
 
@@ -139,19 +143,18 @@ def delete_habit(habit_id):
 @dashboard_bp.route("/habits/search")
 @login_required
 def search_habits():
-    #return render_template("search_results.html", habits=habits) this shows an error for me? too lazy to fix rn -Jaiden
-    return render_template("search_results.html", habits=[]) 
+    #return render_template("search_results.html", habits=habits)
+    return render_template("search_results.html", habits=[])
 
-# View Habits 
+# View Habits
 
 
-# Edit Habits
 
 
 
 # Streak Calculations 
 def calculate_streak(habit_id, user_id):
-    
+
     #Calculates consecutive daily streak ending today.
 
     today = datetime.utcnow().date()
