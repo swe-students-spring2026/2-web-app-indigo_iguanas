@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 
-
 mongoURI = os.getenv('MONGO_URI')
 DbName = os.getenv('MONGO_DBNAME')
 
@@ -20,13 +19,18 @@ db = client[DbName]
 users = db['users']
 habits = db['habits']
 
-test = True
+client.admin.command('ping')  # Check if the connection is successful
+
+
+
+test = False
 
 if __name__ == "__main__" and test:
 
     user = users.insert_one({
         'username': "test_user",
-        'email': "test_user@nyu.edu"
+        'email': "test_user@nyu.edu",
+        'password': "hashed_password"
     })
 
     userID = user.inserted_id
