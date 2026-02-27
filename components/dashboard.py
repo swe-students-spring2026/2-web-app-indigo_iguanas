@@ -160,8 +160,22 @@ def delete_habit(habit_id):
 @dashboard_bp.route("/habits/search")
 @login_required
 def search_habits():
-    #return render_template("search_results.html", habits=habits)
-    return render_template("search_results.html", habits=[])
+    user_id = str(current_user.id)
+    query = request.args.get("q", "").strip()
+
+    if not query:
+        return render_template("search_results.html", habits=[])
+    
+    habits = list(habit_collections.find({
+        "userId": user_id,
+        "name": {"$regex": query, "$options": "i"},
+        "archived": {"$ne": True}
+    })
+
+    for habit in habits:
+        habit["_id"] = str(habit["_id"])
+        
+    return render_template("search_results.html", habits=habits)
 
 # View Habits
 
