@@ -1,0 +1,90 @@
+html{
+    font-family: Arial, sans-serif;
+    background-color: blanchedalmond;
+    margin: 0;
+    padding: 0;
+}
+
+/* you need this line for the formatting, idk why it doesnt work without it */
+*, *::before, *::after{
+    box-sizing: border-box;
+}
+
+body{
+    margin: 0;
+    padding: 4%;
+    border: none;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;  
+}
+
+.container{
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 16px;
+    /* border: 1px solid blue; */
+
+    display: flex;
+    flex-direction: column;
+
+    justify-content: center;
+    align-items: center;
+}
+
+h1{
+    text-align: center;
+    /* border: 1px solid black; */
+    margin-top: 0;
+    margin-bottom: 3vh;
+}
+
+form{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    /* border: 1px solid black; */
+    align-items: center;
+    width:100%
+}
+
+form label{
+    width: 100%;
+    text-align: left;
+}
+
+form input{
+    width: 100%;
+    padding: 12px 12px;
+    border: none;
+    background: lightgray;
+    border-radius: 8px;
+
+}
+
+form button{
+    padding: 12px 12px;
+    font-size: 16px;
+    width: 100%;
+    border-radius: 8px;
+}
+
+.error{
+    background-color: lightcoral;
+    font-weight: bold;
+    text-align: center;
+
+    padding: 6px 6px;
+    border-radius: 8px;
+}
+
+.success{
+    background-color: lightgreen;
+    font-weight: bold;
+    text-align: center;
+
+    padding: 6px 6px;
+    border-radius: 8px;
+}
