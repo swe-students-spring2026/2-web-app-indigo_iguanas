@@ -137,6 +137,23 @@ def edit_habit(habit_id):
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
 @login_required
 def delete_habit(habit_id):
+    user_id = str(current_user.id)
+
+    try:
+        oid = ObjectId(habit_id)
+    except InvalidId:
+        return redirect(url_for("dashboard.dashboard"))
+
+    habit_collections.delete_one({
+        "_id": oid,
+        "userId": user_id
+    })
+
+    completions_collection.delete_many({
+        "habitId": habit_id,
+        "userId": user_id
+    })
+
     return redirect(url_for("dashboard.dashboard"))
 
 # Search Habit
