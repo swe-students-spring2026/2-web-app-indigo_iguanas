@@ -165,16 +165,16 @@ def search_habits():
 
     if not query:
         return render_template("search_results.html", habits=[])
-    
-    habits = list(habit_collections.find)({
+
+    habits = list(habit_collections.find({
         "userId": user_id,
         "name": {"$regex": query, "$options": "i"},
         "archived": {"$ne": True}
-    })
+    }))
 
     for habit in habits:
         habit["_id"] = str(habit["_id"])
-        
+
     return render_template("search_results.html", habits=habits)
 
 # View Habits
