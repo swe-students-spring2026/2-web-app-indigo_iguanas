@@ -178,7 +178,20 @@ def search_habits():
     return render_template("search_results.html", habits=habits)
 
 # View Habits
+@dashboard_bp.route("viewhabits", methods=["GET"])
+@login_required
+def viewhabits():
+    user_id = str(current_user.id)
 
+    habits = list(habit_collections.find(
+        {"userId": user_id},
+        sort=[("createdAt", -1)]
+    ))
+
+    for habit in habits:
+        habit["_id"] = str(habit["_id"])
+
+    return render_template("viewhabits.html", habits=habits)
 
 
 
