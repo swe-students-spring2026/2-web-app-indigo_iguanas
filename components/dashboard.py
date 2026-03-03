@@ -1,9 +1,14 @@
-from flask import Blueprint, render_template, redirect, url_for, request, jsonify
+'''
+Dashboard blueprints and routes for the Web App: Microhabit 
+'''
+
+import os
+from datetime import datetime, timedelta
+from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from datetime import datetime
-import os
+from bson.errors import InvalidId
 from dotenv import load_dotenv
 from datetime import timedelta
 load_dotenv()
@@ -11,12 +16,12 @@ load_dotenv()
 dashboard_bp = Blueprint("dashboard", __name__)
 
 #Mongo Setup
-client = MongoClient(os.getenv("Mongo_URI"))
+client = MongoClient(os.getenv("MONGO_URI"))
 db = client["microhabit"]
 habit_collections = db["habits"]
 completions_collection = db["completions"]
 
-#Dashboard view 
+#Dashboard view
 @dashboard_bp.route("/dashboard")
 #@login_required
 def dashboard():
@@ -66,31 +71,109 @@ def create_habit():
     return redirect(url_for("dashboard.dashboard"))
 
 
-# Create Habit
+# Create Habit Get
+@dashboard_bp.route("/createhabits", methods=["GET"])
+@login_required
+def create_habit_get():
+    user_id = str(current_user.id)
 
+    habits = list(habit_collections.find({
+        "userId": user_id,
+        "archived": {"$ne": True}
+    }))
+
+    for h in habits:
+        h['_id'] = str(h['_id'])
+
+    return render_template('habits.html', habits=habits)
 
 # Toggle Completion
 
 
 # Edit Habit
+@dashboard_bp.route("/edithabit/<habit_id>", methods=["GET","POST"])
+@login_required
+def edit_habit(habit_id):
+    user_id = str(current_user.id)
 
-# Delete Habit 
+    try:
+        oid = ObjectId(habit_id)
+    except InvalidId:
+        return redirect(url_for("dashboard.viewhabits"))
+
+    habit = habit_collections.find_one({
+        "_id": oid,
+        "userId": user_id
+    })
+
+    if not habit:
+        return redirect(url_for("dashboard.viewhabits"))
+
+    if request.method == "POST":
+        data = request.form
+
+        name = (data.get("name") or "").strip()
+
+        updated_fields = {
+            "name":name,
+            "frequency":data.get("frequency") or habit.get('frequency', 'daily'),
+            'updatedAt':datetime.utcnow()
+        }
+
+        if not updated_fields["name"]:
+            return render_template("edithabit.html", habit=habit, error="name is required")
+
+        habit_collections.update_one(
+            {"_id": oid, "userId": user_id},
+            {"$set":updated_fields}
+        )
+        return redirect(url_for("dashboard.viewhabits"))
+
+    habit["_id"] = str(habit["_id"])
+    return render_template("edithabit.html", habit=habit)
+
+
+# Delete Habit
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
 #@login_required
 def delete_habit(habit_id):
+    user_id = str(current_user.id)
+
+    try:
+        oid = ObjectId(habit_id)
+    except InvalidId:
+        return redirect(url_for("dashboard.dashboard"))
+
+    habit_collections.delete_one({
+        "_id": oid,
+        "userId": user_id
+    })
+
+    completions_collection.delete_many({
+        "habitId": habit_id,
+        "userId": user_id
+    })
+
     return redirect(url_for("dashboard.dashboard"))
 
-# Search Habit 
+# Search Habit
 @dashboard_bp.route("/habits/search")
 #@login_required
 def search_habits():
     #SAFE FOR LATER return render_template("search_results.html", habits=habits)
     return "Search not implemented yet"
 
+    for habit in habits:
+        habit["_id"] = str(habit["_id"])
 
-# Streak Calculations 
+    return render_template("viewhabits.html", habits=habits)
+
+
+
+
+# Streak Calculations
 def calculate_streak(habit_id, user_id):
-    
+
     #Calculates consecutive daily streak ending today.
 
     today = datetime.now().date()
@@ -107,7 +190,7 @@ def calculate_streak(habit_id, user_id):
 
         if exists:
             streak += 1
-            today = today.replace(day=today.day - 1)
+            today = today - timedelta(days=1)
         else:
             break
 
