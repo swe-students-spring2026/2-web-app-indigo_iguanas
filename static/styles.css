@@ -87,4 +87,18 @@ form button{
 
     padding: 6px 6px;
     border-radius: 8px;
+.navbar {
+    width: 100%;
+    padding: 12px;
+    background-color: #f5d7b8;
+    text-align: center;
+}
+
+.navbar a {
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
+}
+
 }

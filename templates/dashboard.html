@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 
 <head>
@@ -8,7 +9,7 @@
 </head>
 
 <body>
-
+    {% include "navbar.html" %}
     <h1>Welcome to MicroHabit Dashboard</h1>
 
     <form method="POST" action="{{ url_for('dashboard.create_habit') }}">
