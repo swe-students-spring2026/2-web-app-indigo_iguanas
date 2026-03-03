@@ -10,7 +10,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
-
+from datetime import timedelta
 load_dotenv()
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -23,13 +23,14 @@ completions_collection = db["completions"]
 
 #Dashboard view
 @dashboard_bp.route("/dashboard")
-@login_required
+#@login_required
 def dashboard():
     """
     Displays today's habits for the logged in user.
     """
 
-    user_id = str(current_user.id)
+    # FOR LATER USE user_id = str(current_user.id)
+    user_id = "testuser"
 
     habits = list(habit_collections.find({
         "userId": user_id,
@@ -52,9 +53,9 @@ def dashboard():
 
     return render_template("dashboard.html", habits=habits)
 
-# Create Habit Post
-@dashboard_bp.route("/createhabits", methods=["POST"])
-@login_required
+# Create Habit
+@dashboard_bp.route("/habits", methods=["POST"])
+#@login_required
 def create_habit():
     data = request.form
 
@@ -67,7 +68,6 @@ def create_habit():
     }
 
     habit_collections.insert_one(new_habit)
-
     return redirect(url_for("dashboard.dashboard"))
 
 
@@ -135,7 +135,7 @@ def edit_habit(habit_id):
 
 # Delete Habit
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
-@login_required
+#@login_required
 def delete_habit(habit_id):
     user_id = str(current_user.id)
 
@@ -158,7 +158,7 @@ def delete_habit(habit_id):
 
 # Search Habit
 @dashboard_bp.route("/habits/search")
-@login_required
+#@login_required
 def search_habits():
     user_id = str(current_user.id)
     query = request.args.get("q", "").strip()
@@ -174,11 +174,8 @@ def search_habits():
 
     for habit in habits:
         habit["_id"] = str(habit["_id"])
-        
-    return render_template("search_results.html", habits=habits)
 
-# View Habits
-
+    return render_template("viewhabits.html", habits=habits)
 
 
 
@@ -188,7 +185,7 @@ def calculate_streak(habit_id, user_id):
 
     #Calculates consecutive daily streak ending today.
 
-    today = datetime.utcnow().date()
+    today = datetime.now().date()
     streak = 0
 
     while True:
