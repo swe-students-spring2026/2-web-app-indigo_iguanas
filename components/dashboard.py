@@ -18,14 +18,14 @@ completions_collection = db["completions"]
 
 #Dashboard view 
 @dashboard_bp.route("/dashboard")
-#@login_required
+@login_required
 def dashboard():
     """
     Displays today's habits for the logged in user.
     """
 
-    # FOR LATER USE user_id = str(current_user.id)
-    user_id = "testuser"
+    user_id = str(current_user.id)
+
 
     habits = list(habit_collections.find({
         "userId": user_id,
@@ -50,7 +50,7 @@ def dashboard():
 
 # Create Habit
 @dashboard_bp.route("/habits", methods=["POST"])
-#@login_required
+@login_required
 def create_habit():
     data = request.form
 
@@ -76,16 +76,25 @@ def create_habit():
 
 # Delete Habit 
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
-#@login_required
+@login_required
 def delete_habit(habit_id):
     return redirect(url_for("dashboard.dashboard"))
 
 # Search Habit 
 @dashboard_bp.route("/habits/search")
-#@login_required
+@login_required
 def search_habits():
-    #SAFE FOR LATER return render_template("search_results.html", habits=habits)
-    return "Search not implemented yet"
+    user_id = str(current_user.id)
+    query = request.args.get("q", "").strip()
+
+    if not query:
+        return render_template("search_results.html", habits=[])
+    
+    habits = list(habit_collections.find({
+        "userId": user_id,
+        "name": {"$regex": query, "$options": "i"},
+        "archived": {"$ne": True}
+    }))
 
 
 # Streak Calculations 
