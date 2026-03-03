@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, redirect, url_for, request, jsonif
 from flask_login import login_required, current_user
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from db import habits_collection, completions_collection
 from datetime import datetime
 import os
 from dotenv import load_dotenv
@@ -12,7 +11,8 @@ load_dotenv()
 dashboard_bp = Blueprint("dashboard", __name__)
 
 #Mongo Setup
-
+client = MongoClient(os.getenv("Mongo_URI"))
+db = client["microhabit"]
 habit_collections = db["habits"]
 completions_collection = db["completions"]
 
@@ -55,8 +55,7 @@ def create_habit():
     data = request.form
 
     new_habit = {
-       # "userId": str(current_user.id),
-        "userId": "Test",
+        "userId": str(current_user.id),
         "name": data.get("name"),
         "frequency": "daily",
         "createdAt": datetime.utcnow(),
