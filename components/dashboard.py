@@ -17,20 +17,20 @@ dashboard_bp = Blueprint("dashboard", __name__)
 
 #Mongo Setup
 client = MongoClient(os.getenv("MONGO_URI"))
-db = client["microhabit"]
+db = client[os.getenv("MONGO_DBNAME")]
 habit_collections = db["habits"]
 completions_collection = db["completions"]
 
 #Dashboard view
 @dashboard_bp.route("/dashboard")
-#@login_required
+@login_required
 def dashboard():
     """
     Displays today's habits for the logged in user.
     """
 
-    # FOR LATER USE user_id = str(current_user.id)
-    user_id = "testuser"
+    user_id = str(current_user.id)
+
 
     habits = list(habit_collections.find({
         "userId": user_id,
@@ -55,7 +55,7 @@ def dashboard():
 
 # Create Habit
 @dashboard_bp.route("/habits", methods=["POST"])
-#@login_required
+@login_required
 def create_habit():
     data = request.form
 
@@ -135,7 +135,7 @@ def edit_habit(habit_id):
 
 # Delete Habit
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
-#@login_required
+@login_required
 def delete_habit(habit_id):
     user_id = str(current_user.id)
 
@@ -158,7 +158,7 @@ def delete_habit(habit_id):
 
 # Search Habit
 @dashboard_bp.route("/habits/search")
-#@login_required
+@login_required
 def search_habits():
     user_id = str(current_user.id)
     query = request.args.get("q", "").strip()
