@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Search Habits</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+
+<div class="dashboard-wrapper">
+
+<h1>Search Habits</h1>
+
+<form method="GET" action="{{ url_for('dashboard.search_habits') }}">
+    <input type="text" name="q" placeholder="Search habit name">
+    <button type="submit">Search</button>
+</form>
+{% if habits is defined %}
+    {% if habits %}
+        <h2>Results</h2>
+        <ul>
+        {% for habit in habits %}
+            <li>{{ habit.name }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No habits found.</p>
+    {% endif %}
+{% endif %}
+
+<form action="{{ url_for('dashboard.dashboard') }}">
+    <button type="submit">Back to Dashboard</button>
+</form>
+
+</div>
+
+</body>
+</html>

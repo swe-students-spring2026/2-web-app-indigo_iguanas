@@ -94,6 +94,11 @@ form button{
     background-color: #f5d7b8;
     text-align: center;
 }
+li input[type="checkbox"]{
+    width:20px;
+    height:20px;
+    cursor:pointer;
+}
 
 .navbar a {
     margin: 0 15px;
