@@ -10,6 +10,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
+
 load_dotenv()
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -20,6 +21,7 @@ db = client[os.getenv("MONGO_DBNAME")]
 habit_collections = db["habits"]
 completions_collection = db["completions"]
 
+
 #Dashboard view
 @dashboard_bp.route("/dashboard")
 @login_required
@@ -27,9 +29,7 @@ def dashboard():
     """
     Displays today's habits for the logged in user.
     """
-
     user_id = str(current_user.id)
-
 
     habits = list(habit_collections.find({
         "userId": user_id,
@@ -52,6 +52,7 @@ def dashboard():
 
     return render_template("dashboard.html", habits=habits)
 
+
 @dashboard_bp.route("/habits/new", methods=["GET"])
 @login_required
 def add_habit_page():
@@ -60,7 +61,7 @@ def add_habit_page():
     '''
     return render_template("addhabits.html")
 
-# Create Habit
+
 @dashboard_bp.route("/habits", methods=["POST"])
 @login_required
 def create_habit():
@@ -96,14 +97,13 @@ def create_habit():
         if target <= 0:
             return render_template("addhabits.html", error="Target must be > zero", form=data)
 
-
     new_habit = {
         "userId": str(current_user.id),
         "name": name,
         "frequency": "daily",
         "type": habit_type,
         "category": category if category else None,
-        "notes": notes if notes else None, 
+        "notes": notes if notes else None,
         "unit": unit if habit_type == "count" else None,
         "target": target if habit_type == "count" else None,
         "createdAt": datetime.utcnow(),
@@ -116,10 +116,10 @@ def create_habit():
     habit_collections.insert_one(new_habit)
     return redirect(url_for("dashboard.create_habit_get"))
 
+
 @dashboard_bp.route("/toggle/<habit_id>", methods=["POST"])
 @login_required
 def toggle_habit(habit_id):
-
     user_id = str(current_user.id)
     today_str = datetime.utcnow().strftime("%Y-%m-%d")
 
@@ -130,12 +130,8 @@ def toggle_habit(habit_id):
     })
 
     if completion:
-        # Uncheck → remove completion
-        completions_collection.delete_one({
-            "_id": completion["_id"]
-        })
+        completions_collection.delete_one({"_id": completion["_id"]})
     else:
-        # Check → create completion
         completions_collection.insert_one({
             "habitId": habit_id,
             "userId": user_id,
@@ -144,7 +140,23 @@ def toggle_habit(habit_id):
 
     return redirect(url_for("dashboard.dashboard"))
 
-# Create Habit Get
+
+@dashboard_bp.route("/createhabits", methods=["GET"])
+@login_required
+def create_habit_get():
+    user_id = str(current_user.id)
+
+    habits = list(habit_collections.find({
+        "userId": user_id,
+        "archived": {"$ne": True}
+    }))
+
+    for h in habits:
+        h["_id"] = str(h["_id"])
+
+    return render_template("habits.html", habits=habits)
+
+
 @dashboard_bp.route("/edithabit/<habit_id>", methods=["GET", "POST"])
 @login_required
 def edit_habit(habit_id):
@@ -175,28 +187,34 @@ def edit_habit(habit_id):
 
         if not name:
             habit["_id"] = str(habit["_id"])
+            habit["type"] = habit.get("type", "binary")
             return render_template("edithabit.html", habit=habit, error="Name is required")
 
         if habit_type not in {"binary", "count"}:
             habit["_id"] = str(habit["_id"])
+            habit["type"] = habit.get("type", "binary")
             return render_template("edithabit.html", habit=habit, error="Invalid habit type")
 
         target = None
         if habit_type == "count":
             if not unit:
                 habit["_id"] = str(habit["_id"])
-                return render_template("edithabit.html", habit=habit, error="Unit is required for count habits")
+                habit["type"] = habit.get("type", "binary")
+                return render_template("edithabit.html", habit=habit, error="Required for count")
             if not target_raw:
                 habit["_id"] = str(habit["_id"])
-                return render_template("edithabit.html", habit=habit, error="Target is required for count habits")
+                habit["type"] = habit.get("type", "binary")
+                return render_template("edithabit.html", habit=habit, error="Target required count")
             try:
                 target = float(target_raw)
             except ValueError:
                 habit["_id"] = str(habit["_id"])
-                return render_template("edithabit.html", habit=habit, error="Target must be a number")
+                habit["type"] = habit.get("type", "binary")
+                return render_template("edithabit.html", habit=habit, error="Target must be a num")
             if target <= 0:
                 habit["_id"] = str(habit["_id"])
-                return render_template("edithabit.html", habit=habit, error="Target must be greater than zero")
+                habit["type"] = habit.get("type", "binary")
+                return render_template("edithabit.html", habit=habit, error="Target must be > zero")
 
         set_fields = {
             "name": name,
@@ -216,7 +234,6 @@ def edit_habit(habit_id):
         else:
             unset_fields["notes"] = ""
 
-        # count fields
         if habit_type == "count":
             set_fields["unit"] = unit
             set_fields["target"] = target
@@ -237,7 +254,6 @@ def edit_habit(habit_id):
     return render_template("edithabit.html", habit=habit)
 
 
-# Delete Habit
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
 @login_required
 def delete_habit(habit_id):
@@ -251,10 +267,7 @@ def delete_habit(habit_id):
     except InvalidId:
         return redirect(url_for("dashboard.dashboard"))
 
-    habit_collections.delete_one({
-        "_id": oid,
-        "userId": user_id
-    })
+    habit_collections.delete_one({"_id": oid, "userId": user_id})
 
     completions_collection.delete_many({
         "habitId": habit_id,
@@ -263,7 +276,7 @@ def delete_habit(habit_id):
 
     return redirect(url_for("dashboard.dashboard"))
 
-# Search Habit
+
 @dashboard_bp.route("/habits/search")
 @login_required
 def search_habits():
@@ -288,17 +301,11 @@ def search_habits():
     return render_template("search.html", habits=habits)
 
 
-
-
-# Streak Calculations
 def calculate_streak(habit_id, user_id):
     ''' 
     Calculates daily streaks from users who do their habits
     '''
-
-    #Calculates consecutive daily streak ending today.
-
-    today =  datetime.utcnow().date()
+    today = datetime.utcnow().date()
     streak = 0
 
     while True:
@@ -317,6 +324,7 @@ def calculate_streak(habit_id, user_id):
             break
 
     return streak
+
 
 @dashboard_bp.route("/search")
 @login_required
