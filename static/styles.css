@@ -114,8 +114,9 @@ li {
     margin-bottom: 10px;
     border-radius: 8px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
+    flex-wrap: wrap;
     gap:12px;
 }
 li input[type="checkbox"]{
@@ -124,12 +125,7 @@ li input[type="checkbox"]{
     cursor:pointer;
 }
 li > span:first-of-type{
-    flex:1;
-}
-li > span:nth-of-type(2) {
-    width:40px;
-    font-weight:bold;
-    text-align:center;
+    flex: 1 1 160px;
 }
 .logout-actions{
     display:flex;
@@ -161,6 +157,7 @@ li form button{
   display:flex;
   gap:10px;
   align-items:center;
+    flex-wrap: wrap;
 }
 
 .edit-btn{
@@ -312,9 +309,79 @@ li form{
     white-space: nowrap;
 }
 
-.streakgroup{
+.streak-group{
     display:flex;
     flex-direction:column;
     gap:4px;
     min-width: 140px;
+}
+
+.habit-row{
+    display:grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+        "name complete"
+        "meta actions";
+    align-items:center;
+    gap:10px 14px;
+}
+
+.habit-name{
+    grid-area:name;
+    font-size: 16px;
+}
+
+.complete-form{
+    grid-area:complete;
+}
+
+.habit-row .streak-group{
+    grid-area:meta;
+}
+
+.row-actions{
+    grid-area:actions;
+    justify-content:flex-end;
+    flex-wrap:nowrap;
+}
+
+.row-actions form{
+    margin:0;
+}
+
+@media (max-width: 400px){
+    .habit-row{
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "name"
+            "complete"
+            "meta"
+            "actions";
+        gap:8px;
+        justify-content: center;
+        align-items: center;
+
+    }
+
+    .complete-form,
+    .row-actions{
+        width:100%;
+    }
+
+    .complete-form button,
+    .row-actions .primary-button,
+    .row-actions form,
+    .row-actions form button{
+        width:100%;
+    }
+
+    .row-actions{
+        flex-direction:column;
+        align-items:stretch;
+        gap:8px;
+    }
+
+    .streak-group{
+        min-width:0;
+    }
 }
