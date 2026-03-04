@@ -36,11 +36,12 @@
                 </button>
             </form>
 
-            <span class="streak-text">Streak: {{ habit.streak }}</span>
-
-            {% if today_str %} 
-            <span class="muted" style="text-align:center; margin-top:6px;">Today: {{today_str}}</span>
-            {% endif %}
+            <div class="streakgroup">
+                <span class="streak-text">Streak: {{ habit.streak }}</span>
+                {% if today_str %}
+                <span class="muted">Today: {{today_str}}</span>
+                {% endif %}
+            </div>
 
             <div class="habit-actions">
                 <a href="{{ url_for('dashboard.edit_habit', habit_id=habit._id) }}" class="primary-button edit-btn">Edit </a>
