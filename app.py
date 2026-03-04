@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from bson.objectid import ObjectId
 
 from flask import Flask, render_template, redirect, url_for, request
-from flask_login import LoginManager, login_user, logout_user, UserMixin, login_required
+from flask_login import LoginManager, login_user, logout_user, UserMixin, login_required, current_user
 
 from db import db, users, habits 
 from components.dashboard import dashboard_bp
@@ -86,7 +86,75 @@ def app():
         
         users.insert_one({"username": username, "email":email, "password":password})
         return render_template("login.html", message="Registration complete! Please login.")
+    
 
+    ##### user profile page
+
+    @app.route("/profile")
+    @login_required
+    def profile():
+        # 1) get the logged-in user's document from Mongo
+        user_doc = users.find_one({"_id": ObjectId(current_user.id)})
+
+        if not user_doc:
+            # if somehow the session exists but the user doesn't
+            return redirect(url_for("login_route"))
+
+        # 2) compute stats (adjust query to match your habits schema)
+        # Most likely in your repo habits use "userId" as a string
+        habit_count = habits.count_documents({"userId": str(current_user.id)})
+
+        active_count = habits.count_documents({
+            "userId": str(current_user.id),
+            "archived": {"$ne": True}
+        })
+
+        best_streak = "—"
+
+        member_since = user_doc.get("created_at", "N/A")
+
+        return render_template(
+            "profile.html",
+            user=user_doc,
+            member_since=member_since,
+            habit_count=habit_count,
+            active_count=active_count,
+            best_streak=best_streak,
+        )
+    
+
+    ##### edit profile 
+
+    @app.route("/profile/edit", methods=["GET", "POST"])
+    @login_required
+    def edit_profile():
+        user_doc = users.find_one({"_id": ObjectId(current_user.id)})
+        if not user_doc:
+            return redirect(url_for("login_route"))
+
+        if request.method == "GET":
+            return render_template("editprofile.html", user=user_doc)
+
+        # POST: read form fields
+        username = (request.form.get("username") or "").strip()
+        email = (request.form.get("email") or "").strip()
+
+        # basic validation
+        if not username:
+            return render_template("editprofile.html", user=user_doc, error="Username is required.")
+
+        if email and ("@" not in email or "." not in email):
+            return render_template("editprofile.html", user=user_doc, error="Enter a valid email.")
+
+        # update db
+        users.update_one(
+            {"_id": ObjectId(current_user.id)},
+            {"$set": {"username": username, "email": email}}
+        )
+
+        return redirect(url_for("profile"))
+        
+    ########
 
     #logout stuff
     @app.route("/logout")
