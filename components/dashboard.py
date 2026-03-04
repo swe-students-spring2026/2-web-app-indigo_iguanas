@@ -290,21 +290,22 @@ def search_habits():
     Allows the user to search for their habits
     """
     user_id = str(current_user.id)
-    query = request.args.get("q", "").strip()
+    query = (request.args.get("q") or "").strip()
 
-    if not query:
-        return render_template("search.html", habits=[])
-
-    habits = list(habit_collections.find({
+    mongo_query = {
         "userId": user_id,
-        "name": {"$regex": query, "$options": "i"},
         "archived": {"$ne": True}
-    }))
+    }
 
-    for habit in habits:
-        habit["_id"] = str(habit["_id"])
+    if query:
+        mongo_query["name"] = {"$regex": query, "$options": "i"}
 
-    return render_template("search.html", habits=habits)
+    habits = list(habit_collections.find(mongo_query))
+
+    for h in habits:
+        h["_id"] = str(h["_id"])
+
+    return render_template("habits.html", habits=habits)
 
 
 def calculate_streak(habit_id, user_id):
