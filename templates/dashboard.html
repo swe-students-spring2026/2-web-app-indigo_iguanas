@@ -12,12 +12,7 @@
     <div class="dashboard-wrapper">
     <h1>Welcome to MicroHabit Dashboard</h1>
 
-    <form method="POST" action="{{ url_for('dashboard.create_habit') }}">
-        <input type="text" name="name" placeholder="Enter habit name" required>
-        <button type="submit">Add Habit</button>
-    </form>
-   
-    
+    <a href="{{ url_for('dashboard.add_habit_page') }}" class="primary-button">Add Habit</a>
 
    <h2>Habit List</h2>
 
@@ -50,7 +45,7 @@
    {% endif %}
     
     <form action="{{ url_for('dashboard.search_page') }}" method="GET">
-    <button type="primary-button">Search Habits</button>
+    <button type="submit">Search Habits</button>
     </form>
     <a href="{{ url_for('dashboard.logout_page') }}" class="logout-link">Logout</a>
    

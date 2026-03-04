@@ -62,18 +62,54 @@ def add_habit_page():
 @dashboard_bp.route("/habits", methods=["POST"])
 @login_required
 def create_habit():
-    data = request.form
+    data = request.form 
+
+    name = (data.get("name") or "").strip()
+    category = (data.get("category") or "").strip()
+    notes = (data.get("notes") or "").strip()
+
+    habit_type = (data.get("type") or "binary").strip()
+    unit = (data.get("unit") or "").strip()
+    target_raw = (data.get("target") or "").strip()
+
+    if not name:
+        return render_template("addhabits.html", error="Name is required", form=data)
+    
+    if habit_type not in {"binary", "count"}:
+        return render_template("addhabits.html", error="Invalid habit type", form=data)
+    
+    target = None
+    if habit_type == "count":
+        if not unit:
+            return render_template("addhabits.html", error="Unit is required for count habits", form=data)
+        if not target_raw:
+            return render_template("addhabits.html", error="Target is required for count habits", form=data)
+        try:
+            target = float(target_raw)
+        except ValueError:
+            return render_template("addhabits.html", error="Target must be a number", form=data)
+        if target <= 0:
+            return render_template("addhabits.html", error="Target must be greater than zero", form=data)
+
 
     new_habit = {
         "userId": str(current_user.id),
-        "name": data.get("name"),
+        "name": name,
         "frequency": "daily",
+        "type": habit_type,
+        "category": category if category else None,
+        "notes": notes if notes else None, 
+        "unit": unit if habit_type == "count" else None,
+        "target": target if habit_type == "count" else None,
         "createdAt": datetime.utcnow(),
-        "archived": False
+        "updatedAt": datetime.utcnow(),
+        "archived": False,
     }
 
+    new_habit = {k: v for k, v in new_habit.items() if v is not None}
+
     habit_collections.insert_one(new_habit)
-    return redirect(url_for("dashboard.dashboard"))
+    return redirect(url_for("dashboard.create_habit_get"))
 
 @dashboard_bp.route("/toggle/<habit_id>", methods=["POST"])
 @login_required
@@ -131,7 +167,7 @@ def edit_habit(habit_id):
     try:
         oid = ObjectId(habit_id)
     except InvalidId:
-        return redirect(url_for("dashboard.viewhabits"))
+        return redirect(url_for("dashboard.create_habit_get"))
 
     habit = habit_collections.find_one({
         "_id": oid,
@@ -139,7 +175,7 @@ def edit_habit(habit_id):
     })
 
     if not habit:
-        return redirect(url_for("dashboard.viewhabits"))
+        return redirect(url_for("dashboard.create_habit_get"))
 
     if request.method == "POST":
         data = request.form
@@ -159,7 +195,7 @@ def edit_habit(habit_id):
             {"_id": oid, "userId": user_id},
             {"$set":updated_fields}
         )
-        return redirect(url_for("dashboard.viewhabits"))
+        return redirect(url_for("dashboard.create_habit_get"))
 
     habit["_id"] = str(habit["_id"])
     return render_template("edithabit.html", habit=habit)
@@ -196,7 +232,7 @@ def search_habits():
     query = request.args.get("q", "").strip()
 
     if not query:
-        return render_template("search_results.html", habits=[])
+        return render_template("search.html", habits=[])
     
     habits = list(habit_collections.find({
         "userId": user_id,
