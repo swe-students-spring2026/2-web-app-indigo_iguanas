@@ -122,9 +122,13 @@ li input[type="checkbox"]{
     height:20px;
     cursor:pointer;
 }
-
-li span {
-    font-weight: bold;
+li span:first-of-type{
+    flex:1;
+}
+li span:nth-of-type(2) {
+    width:40px;
+    font-weight:bold;
+    text-align:center;
 }
 .logout-actions{
     display:flex;
@@ -161,4 +165,136 @@ li form button{
 .edit-btn{
   width:auto;
   padding:6px 12px;
+}
+
+form textarea{
+    width:100%;
+    padding:12px;
+    border:none;
+    background:lightgray;
+    border-radius:8px;
+    resize:vertical;
+}
+
+form select{
+    width:100%;
+    padding:12px;
+    border:none;
+    background:lightgray;
+    border-radius:8px;
+}
+
+#count-fields{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+li form{
+    display:flex;
+    align-items:center;
+    width:auto;
+}
+
+/* Habits Styles */
+.page-header{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin: bottom 16px;
+}
+
+.page-title{
+    margin:0;
+}
+
+.search-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.search-input{
+    width: 100%;
+    max-width:520px;
+    padding:10px 12px;
+    border-radius: 10px;
+    border:2px solid #333;
+    background: #fff;
+    font-size: 16px;
+}
+
+.habit-list{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.habit-card{
+    background-color: lightgray;
+    padding: 14px;
+    border-radius: 12px;
+    display:block;
+}
+
+.habit-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px
+}
+
+.habit-title-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items: center;
+}
+
+.habit-title{
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.1;
+}
+
+.pill{
+    display: inline-block;
+    padding:4px 10px;
+    border-radius: 999px;
+    border:2px solid #333;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.habit-meta{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 16px;
+    margin-top: 6px;
+}
+
+.muted{
+  opacity:0.85;
+}
+
+.small-button{
+  width:auto;
+  padding:6px 12px;
+  border-radius:10px;
+  display:inline-block;
+}
+
+.bottom-actions{
+  margin-top:18px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  align-items:center;
 }
