@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Habits</title>
+  <link rel="stylesheet" href="static/styles.css">
+</head>
+
+<body>
+  <div class="dashboard-wrapper">
+    <h1>View Habits</h1>
+
+    {% if habits and habits|length > 0 %}
+      <ul>
+        {% for habit in habits %}
+          <li style="display:block;">
+            <div><strong>{{ habit.name }}</strong></div>
+
+            {% if habit.category %}
+              <div>Category: {{ habit.category }}</div>
+            {% endif %}
+
+            {% if habit.notes %}
+              <div>Notes: {{ habit.notes }}</div>
+            {% endif %}
+
+            <div>Type: {{ habit.type if habit.type else 'binary' }}</div>
+
+            {% if habit.type == 'count' %}
+              <div>Target: {{ habit.target }} {{ habit.unit }}</div>
+            {% endif %}
+            <a 
+                href="{{url_for('dashboard.edit_habit', habit_id=habit._id )}}"
+                class="primary-button"
+                style="width:auto; padding:6px 12px; margin-top:8px; display:inline-block;">
+            Edit
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No habits yet</p>
+    {% endif %}
+
+    <div style="margin-top: 16px;">
+      <a href="{{ url_for('dashboard.add_habit_page') }}" class="primary-button">Add Habit</a>
+      <a href="{{ url_for('dashboard.dashboard') }}" class="logout-link">Back to Dashboard</a>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -12,12 +12,10 @@
     <div class="dashboard-wrapper">
     <h1>Welcome to MicroHabit Dashboard</h1>
 
-    <form method="POST" action="{{ url_for('dashboard.create_habit') }}">
-        <input type="text" name="name" placeholder="Enter habit name" required>
-        <button type="submit">Add Habit</button>
-    </form>
-   
-    
+    <div class="habit-actions">
+      <a href="{{ url_for('dashboard.add_habit_page') }}" class="primary-button">Add Habit</a>
+      <a href="{{ url_for('dashboard.create_habit_get') }}" class="primary-button">View Habits</a>
+    </div>
 
    <h2>Habit List</h2>
 
@@ -39,9 +37,13 @@
 
             <span>{{ habit.streak }}</span>
 
+            <div class="habit-actions">
+                <a href="{{ url_for('dashboard.edit_habit', habit_id=habit._id) }}" class="primary-button edit-btn">Edit </a>
+
             <form method="POST" action="{{ url_for('dashboard.delete_habit', habit_id=habit._id) }}">
                 <button type="submit">Delete</button>
             </form>
+            </div>
         </li>
     {% endfor %}
     </ul>
@@ -50,9 +52,10 @@
    {% endif %}
     
     <form action="{{ url_for('dashboard.search_page') }}" method="GET">
-    <button type="primary-button">Search Habits</button>
+        <button type="submit">Search Habits</button>
     </form>
-    <a href="{{ url_for('dashboard.logout_page') }}" class="logout-link">Logout</a>
+
+    <a href="/logout" class="logout-link">Logout</a>
    
 </div>
 </body>

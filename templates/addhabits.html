@@ -1,1 +1,79 @@
-<a href="/createhabits"> View Habits</a>
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Add Habits</title>
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+
+<body>
+    <div class="dashboard-wrapper">
+        <h1> Add a Habit</h1>
+
+        {% if error %}
+            <p class="error">{{ error }} </p>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('dashboard.create_habit') }}">
+            <input 
+                type="text"
+                name="name"
+                placeholder="Habit name"
+                required
+                value="{{ form.name if form else ''}}"
+            >
+
+            <input
+                type="text"
+                name="category"
+                placeholder="category {optional}"
+                value = "{{ form.category if form else '' }}"
+            >
+
+            <textarea name="notes" placeholder="Notes (optional)">{{ form.notes if form else '' }}</textarea>
+
+            <label for="type">Type</label>
+            <select name="type" id="type" onchange="toggleCountFields()">
+                <option value="binary" {% if form and form.type == 'binary' %}selected{% endif %}> Checkbox (done or not)</option>
+                <option value="count" {% if form and form.type == 'count' %}selected{% endif %}>Count / Amount</option>
+            </select>
+
+                  <div id="count-fields" style="display:none; margin-top: 8px;">
+        <input
+          type="text"
+          name="unit"
+          placeholder="Unit (e.g., cups, minutes, pages)"
+          value="{{ form.unit if form else '' }}"
+        >
+        <input
+          type="number"
+          step="0.1"
+          name="target"
+          placeholder="Target (e.g., 8)"
+          value="{{ form.target if form else '' }}"
+        >
+      </div>
+
+      <button type="submit" class="primary-button">Create Habit</button>
+
+    </form>
+
+    <div style="margin-top: 16px">
+        <a href="/createhabits">View Habits</a>
+        <span> . </span>
+        <a href="{{ url_for('dashboard.dashboard') }}"> Back to Dashboard</a>
+    </div>
+
+    <script>
+      function toggleCountFields() {
+        const type = document.getElementById('type').value;
+        document.getElementById('count-fields').style.display = (type === 'count') ? 'block' : 'none';
+      }
+      toggleCountFields();
+    </script>
+    </div>
+</body>
+
+</html>
