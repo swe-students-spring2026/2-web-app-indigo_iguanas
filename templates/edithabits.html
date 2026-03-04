@@ -1,5 +1,86 @@
 <!DOCTYPE html>
 <html>
-  <head><meta charset="UTF-8"><title>Edit</title></head>
-  <body>EDIT OK</body>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Habit</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+  <div class="dashboard-wrapper">
+    <h1>Edit Habit</h1>
+
+    {% if error %}
+      <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('dashboard.edit_habit', habit_id=habit._id) }}">
+      <label for="name">Habit name</label>
+      <input
+        id="name"
+        type="text"
+        name="name"
+        required
+        value="{{ habit.name }}"
+      >
+
+      <label for="category">Category (optional)</label>
+      <input
+        id="category"
+        type="text"
+        name="category"
+        value="{{ habit.category if habit.category else '' }}"
+      >
+
+      <label for="notes">Notes (optional)</label>
+      <textarea id="notes" name="notes">{{ habit.notes if habit.notes else '' }}</textarea>
+
+      <label for="type">Type</label>
+      <select name="type" id="type" onchange="toggleCountFields()">
+        <option value="binary" {% if (habit.type or 'binary') == 'binary' %}selected{% endif %}>Checkbox (done or not)</option>
+        <option value="count" {% if habit.type == 'count' %}selected{% endif %}>Count / Amount</option>
+      </select>
+
+      <div id="count-fields" style="display:none; margin-top: 8px;">
+        <label for="unit">Unit</label>
+        <input
+          id="unit"
+          type="text"
+          name="unit"
+          placeholder="cups, minutes, pages..."
+          value="{{ habit.unit if habit.unit else '' }}"
+        >
+
+        <label for="target">Target</label>
+        <input
+          id="target"
+          type="number"
+          step="0.1"
+          name="target"
+          placeholder="8"
+          value="{{ habit.target if habit.target else '' }}"
+        >
+      </div>
+
+      <button type="submit" class="primary-button">Save Changes</button>
+
+      <div style="margin-top: 12px;">
+        <a href="{{ url_for('dashboard.create_habit_get') }}">Back to View Habits</a>
+        <span> . </span>
+        <a href="{{ url_for('dashboard.dashboard') }}">Back to Dashboard</a>
+      </div>
+    </form>
+
+    <script>
+      function toggleCountFields() {
+        const type = document.getElementById('type').value;
+        document.getElementById('count-fields').style.display = (type === 'count') ? 'block' : 'none';
+      }
+      toggleCountFields();
+    </script>
+  </div>
+</body>
+
 </html>
