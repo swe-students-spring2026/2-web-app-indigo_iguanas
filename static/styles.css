@@ -122,11 +122,13 @@ li input[type="checkbox"]{
     height:20px;
     cursor:pointer;
 }
-
+li span:first-of-type{
+    flex:1;
+}
 li span:nth-of-type(2) {
-    width: 40px;
-    text-align: center;
-    font-weight: bold;
+    width:40px;
+    font-weight:bold;
+    text-align:center;
 }
 .logout-actions{
     display:flex;
@@ -186,4 +188,9 @@ form select{
     display:flex;
     flex-direction:column;
     gap:12px;
+}
+li form{
+    display:flex;
+    align-items:center;
+    width:auto;
 }
