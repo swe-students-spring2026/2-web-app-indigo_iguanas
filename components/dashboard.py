@@ -145,26 +145,7 @@ def toggle_habit(habit_id):
     return redirect(url_for("dashboard.dashboard"))
 
 # Create Habit Get
-@dashboard_bp.route("/createhabits", methods=["GET"])
-@login_required
-def create_habit_get():
-    user_id = str(current_user.id)
-
-    habits = list(habit_collections.find({
-        "userId": user_id,
-        "archived": {"$ne": True}
-    }))
-
-    for h in habits:
-        h['_id'] = str(h['_id'])
-
-    return render_template('habits.html', habits=habits)
-
-# Toggle Completion
-
-
-# Edit Habit
-@dashboard_bp.route("/edithabit/<habit_id>", methods=["GET","POST"])
+@dashboard_bp.route("/edithabit/<habit_id>", methods=["GET", "POST"])
 @login_required
 def edit_habit(habit_id):
     """
@@ -177,11 +158,7 @@ def edit_habit(habit_id):
     except InvalidId:
         return redirect(url_for("dashboard.create_habit_get"))
 
-    habit = habit_collections.find_one({
-        "_id": oid,
-        "userId": user_id
-    })
-
+    habit = habit_collections.find_one({"_id": oid, "userId": user_id})
     if not habit:
         return redirect(url_for("dashboard.create_habit_get"))
 
@@ -189,23 +166,74 @@ def edit_habit(habit_id):
         data = request.form
 
         name = (data.get("name") or "").strip()
+        category = (data.get("category") or "").strip()
+        notes = (data.get("notes") or "").strip()
 
-        updated_fields = {
-            "name":name,
-            "frequency":data.get("frequency") or habit.get('frequency', 'daily'),
-            'updatedAt':datetime.utcnow()
+        habit_type = (data.get("type") or "binary").strip()
+        unit = (data.get("unit") or "").strip()
+        target_raw = (data.get("target") or "").strip()
+
+        if not name:
+            habit["_id"] = str(habit["_id"])
+            return render_template("edithabit.html", habit=habit, error="Name is required")
+
+        if habit_type not in {"binary", "count"}:
+            habit["_id"] = str(habit["_id"])
+            return render_template("edithabit.html", habit=habit, error="Invalid habit type")
+
+        target = None
+        if habit_type == "count":
+            if not unit:
+                habit["_id"] = str(habit["_id"])
+                return render_template("edithabit.html", habit=habit, error="Unit is required for count habits")
+            if not target_raw:
+                habit["_id"] = str(habit["_id"])
+                return render_template("edithabit.html", habit=habit, error="Target is required for count habits")
+            try:
+                target = float(target_raw)
+            except ValueError:
+                habit["_id"] = str(habit["_id"])
+                return render_template("edithabit.html", habit=habit, error="Target must be a number")
+            if target <= 0:
+                habit["_id"] = str(habit["_id"])
+                return render_template("edithabit.html", habit=habit, error="Target must be greater than zero")
+
+        set_fields = {
+            "name": name,
+            "type": habit_type,
+            "updatedAt": datetime.utcnow(),
         }
 
-        if not updated_fields["name"]:
-            return render_template("edithabit.html", habit=habit, error="name is required")
+        unset_fields = {}
 
-        habit_collections.update_one(
-            {"_id": oid, "userId": user_id},
-            {"$set":updated_fields}
-        )
+        if category:
+            set_fields["category"] = category
+        else:
+            unset_fields["category"] = ""
+
+        if notes:
+            set_fields["notes"] = notes
+        else:
+            unset_fields["notes"] = ""
+
+        # count fields
+        if habit_type == "count":
+            set_fields["unit"] = unit
+            set_fields["target"] = target
+        else:
+            unset_fields["unit"] = ""
+            unset_fields["target"] = ""
+
+        update_doc = {"$set": set_fields}
+        if unset_fields:
+            update_doc["$unset"] = unset_fields
+
+        habit_collections.update_one({"_id": oid, "userId": user_id}, update_doc)
+
         return redirect(url_for("dashboard.create_habit_get"))
 
     habit["_id"] = str(habit["_id"])
+    habit["type"] = habit.get("type", "binary")
     return render_template("edithabit.html", habit=habit)
 
 
