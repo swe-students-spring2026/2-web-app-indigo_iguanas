@@ -4,13 +4,13 @@ Dashboard blueprints and routes for the Web App: Microhabit
 
 import os
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
-from zoneinfo import ZoneInfo
 
 load_dotenv()
 

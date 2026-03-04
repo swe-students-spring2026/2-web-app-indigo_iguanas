@@ -116,6 +116,7 @@ li {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap:12px;
 }
 li input[type="checkbox"]{
     width:20px;
@@ -201,11 +202,11 @@ li form{
     display:flex;
     flex-direction:column;
     gap:10px;
-    margin: bottom 16px;
+    margin-bottom:16px;
 }
 
 .page-title{
-    margin:0;
+    margin:0; 
 }
 
 .search-row{
@@ -245,7 +246,7 @@ li form{
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
-    gap:12px
+    gap:12px;
 }
 
 .habit-title-row{
@@ -297,4 +298,16 @@ li form{
   flex-direction:column;
   gap:10px;
   align-items:center;
+}
+
+.complete-btn{
+    width:auto;
+    padding:6px 12px;
+    white-space: nowrap;
+    display:inline-block;
+}
+
+.streak-text{
+    font-weight: bold;
+    white-space: nowrap;
 }
