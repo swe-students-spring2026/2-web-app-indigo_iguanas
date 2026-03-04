@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 60px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        .profile-field {
+            margin-bottom: 15px;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .value {
+            margin-top: 4px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+
+        .stat-box {
+            background: #f0f2f5;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+            width: 30%;
+        }
+
+        .actions {
+            margin-top: 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        button {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .edit {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .logout {
+            background-color: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Profile</h1>
+
+        <div class="profile-field">
+            <div class="label">Username</div>
+            <div class="value">{{ user.get("username", "Unknown User") }}</div>
+        </div>
+
+        <div class="profile-field">
+            <div class="label">Email</div>
+            <div class="value">{{ user.get("email", "N/A") }}</div>
+        </div>
+
+        <div class="profile-field">
+            <div class="label">Member Since</div>
+            <div class="value">
+                {{ member_since if member_since is defined else "N/A" }}
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="label">Habits</div>
+                <div class="value">
+                    {{ habit_count if habit_count is defined else "—" }}
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="label">Active</div>
+                <div class="value">
+                    {{ active_count if active_count is defined else "—" }}
+                </div>
+            </div>
+
+            <div class="stat-box">
+                <div class="label">Best Streak</div>
+                <div class="value">
+                    {{ best_streak if best_streak is defined else "—" }}
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="{{ url_for('edit_profile') }}">
+            <button class="edit" type="button">Edit Profile</button>
+            </a>
+
+            <a href="{{ url_for('logout_route') }}">
+                <button class="logout">Log Out</button>
+            </a>
+        </div>
+
+        
+    </div>
+</body>
+</html>
