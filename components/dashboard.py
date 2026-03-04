@@ -11,7 +11,6 @@ from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
 from flask_login import logout_user
-from datetime import timedelta
 load_dotenv()
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -57,7 +56,7 @@ def dashboard():
 @dashboard_bp.route("/habits/new", methods=["GET"])
 @login_required
 def add_habit_page():
-    return render_template("add_habits.html")
+    return render_template("addhabits.html")
 
 # Create Habit
 @dashboard_bp.route("/habits", methods=["POST"])
