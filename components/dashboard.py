@@ -272,18 +272,6 @@ def calculate_streak(habit_id, user_id):
 
     return streak
 
-@dashboard_bp.route("/logout")
-@login_required
-def logout_page():
-    return render_template("logout.html")
-
-
-@dashboard_bp.route("/logout/confirm", methods=["POST"])
-@login_required
-def logout_confirm():
-    logout_user()
-    return redirect(url_for("login_route"))
-
 @dashboard_bp.route("/search")
 @login_required
 def search_page():
