@@ -123,7 +123,9 @@ li input[type="checkbox"]{
     cursor:pointer;
 }
 
-li span {
+li span:nth-of-type(2) {
+    width: 40px;
+    text-align: center;
     font-weight: bold;
 }
 .logout-actions{
@@ -161,4 +163,27 @@ li form button{
 .edit-btn{
   width:auto;
   padding:6px 12px;
+}
+form textarea{
+    width:100%;
+    padding:12px;
+    border:none;
+    background:lightgray;
+    border-radius:8px;
+    resize:vertical;
+}
+
+form select{
+    width:100%;
+    padding:12px;
+    border:none;
+    background:lightgray;
+    border-radius:8px;
+}
+
+#count-fields{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
 }
