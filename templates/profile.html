@@ -1,138 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>User Profile</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f8;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 60px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            margin-bottom: 10px;
-        }
-
-        .profile-field {
-            margin-bottom: 15px;
-        }
-
-        .label {
-            font-weight: bold;
-            color: #555;
-        }
-
-        .value {
-            margin-top: 4px;
-        }
-
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 25px;
-        }
-
-        .stat-box {
-            background: #f0f2f5;
-            padding: 15px;
-            border-radius: 6px;
-            text-align: center;
-            width: 30%;
-        }
-
-        .actions {
-            margin-top: 30px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        button {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .edit {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .logout {
-            background-color: #e74c3c;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
-    <div class="container">
-        <h1>Profile</h1>
+  <div class="dashboard-wrapper">
+    <h1>Profile</h1>
 
-        <div class="profile-field">
-            <div class="label">Username</div>
-            <div class="value">{{ user.get("username", "Unknown User") }}</div>
-        </div>
+    <ul class="habit-list">
+      <li class="habit-card">
+        <div><strong>Username:</strong> {{ user.get("username", "Unknown") if user else "Unknown" }}</div>
+        <div><strong>Email:</strong> {{ user.get("email", "N/A") if user else "N/A" }}</div>
+        <div><strong>Member Since:</strong> {{ member_since }}</div>
+      </li>
+    </ul>
 
-        <div class="profile-field">
-            <div class="label">Email</div>
-            <div class="value">{{ user.get("email", "N/A") }}</div>
-        </div>
+    <h2>Statistics</h2>
+    <ul class="habit-list">
+      <li class="habit-card"><strong>Total Habits:</strong> {{ total_habits }}</li>
+      <li class="habit-card"><strong>Total Completions:</strong> {{ total_completions }}</li>
+      <li class="habit-card"><strong>Best Streak:</strong> {{ best_streak }}</li>
+    </ul>
 
-        <div class="profile-field">
-            <div class="label">Member Since</div>
-            <div class="value">
-                {{ member_since if member_since is defined else "N/A" }}
-            </div>
-        </div>
+    <h2>Habits</h2>
 
-        <div class="stats">
-            <div class="stat-box">
-                <div class="label">Habits</div>
-                <div class="value">
-                    {{ habit_count if habit_count is defined else "—" }}
+    {% if habits and habits|length > 0 %}
+      <ul class="habit-list">
+        {% for habit in habits %}
+          <li class="habit-card">
+            <div class="habit-top">
+              <div>
+                <div class="habit-title-row">
+                  <h2 class="habit-title">{{ habit.name }}</h2>
+                  {% if habit.category %}
+                    <span class="pill">{{ habit.category }}</span>
+                  {% endif %}
                 </div>
-            </div>
 
-            <div class="stat-box">
-                <div class="label">Active</div>
-                <div class="value">
-                    {{ active_count if active_count is defined else "—" }}
+                <div class="habit-meta">
+                  <div><strong>Current Streak:</strong> {{ habit.streak }}</div>
+                  <div class="muted"><strong>Completed (all time):</strong> {{ habit.completion_count }}</div>
+                  {% if habit.notes %}
+                    <div class="muted">{{ habit.notes }}</div>
+                  {% endif %}
                 </div>
+              </div>
             </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No habits yet.</p>
+    {% endif %}
 
-            <div class="stat-box">
-                <div class="label">Best Streak</div>
-                <div class="value">
-                    {{ best_streak if best_streak is defined else "—" }}
-                </div>
-            </div>
-        </div>
-
-        <div class="actions">
-            <a href="{{ url_for('edit_profile') }}">
-            <button class="edit" type="button">Edit Profile</button>
-            </a>
-
-            <a href="{{ url_for('logout_route') }}">
-                <button class="logout">Log Out</button>
-            </a>
-        </div>
-
-        
+    <div class="bottom-actions">
+      <a href="{{ url_for('dashboard.dashboard') }}" class="primary-button">Back to Dashboard</a>
+      <a href="{{ url_for('dashboard.create_habit_get') }}" class="logout-link">View Habits</a>
+      <a href="/logout" class="logout-link">Logout</a>
     </div>
+  </div>
 </body>
 </html>
