@@ -16,7 +16,7 @@
         <input type="text" name="name" placeholder="Enter habit name" required>
         <button type="submit">Add Habit</button>
     </form>
-
+   
     
 
    <h2>Habit List</h2>
@@ -44,8 +44,9 @@
    {% else %}
        <p>No habits yet. Add one above </p>
    {% endif %}
-    <form action="{{ url_for('dashboard.logout_page') }}" method="GET">
-    <button type="submit">Logout</button>
+    
+    <form action="{{ url_for('dashboard.search_page') }}" method="GET">
+    <button type="primary-button">Search Habits</button>
     </form>
 
    

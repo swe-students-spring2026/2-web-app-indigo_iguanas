@@ -131,3 +131,14 @@ li span {
     flex-direction:column;
     gap:10px;
 }
+.primary-button {
+    width:100%;
+    padding:12px;
+    border-radius:10px;
+    border:2px solid #333;
+    background: lightgray;
+    display:block;
+    text-align:center;
+    text-decoration:none;
+    color:black;
+}

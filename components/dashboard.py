@@ -203,7 +203,7 @@ def search_habits():
     for habit in habits:
         habit["_id"] = str(habit["_id"])
 
-    return render_template("viewhabits.html", habits=habits)
+    return render_template("search.html", habits=habits)
 
 
 
@@ -244,3 +244,8 @@ def logout_page():
 def logout_confirm():
     logout_user()
     return redirect(url_for("login_route"))
+
+@dashboard_bp.route("/search")
+@login_required
+def search_page():
+    return render_template("search.html")
