@@ -146,3 +146,8 @@ li form button{
     width: auto;
     padding: 6px 12px;
 }
+.logout-link{
+    display:block;
+    text-align:center;
+    margin-top:10px;
+}
