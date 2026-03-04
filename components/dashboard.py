@@ -5,7 +5,7 @@ Dashboard blueprints and routes for the Web App: Microhabit
 import os
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request
-from flask_login import login_required, current_user, logout_user
+from flask_login import login_required, current_user
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
@@ -55,12 +55,18 @@ def dashboard():
 @dashboard_bp.route("/habits/new", methods=["GET"])
 @login_required
 def add_habit_page():
+    '''
+    Allows the user to render the add habit page
+    '''
     return render_template("addhabits.html")
 
 # Create Habit
 @dashboard_bp.route("/habits", methods=["POST"])
 @login_required
 def create_habit():
+    """
+    Allows the user to create new habits
+    """
     data = request.form
 
     name = (data.get("name") or "").strip()
@@ -161,6 +167,9 @@ def create_habit_get():
 @dashboard_bp.route("/edithabit/<habit_id>", methods=["GET","POST"])
 @login_required
 def edit_habit(habit_id):
+    """
+    Allows the user to edit their habits
+    """
     user_id = str(current_user.id)
 
     try:
@@ -204,6 +213,9 @@ def edit_habit(habit_id):
 @dashboard_bp.route("/habits/<habit_id>/delete", methods=["POST"])
 @login_required
 def delete_habit(habit_id):
+    """
+    Allows the user to delete their habits
+    """
     user_id = str(current_user.id)
 
     try:
@@ -227,6 +239,9 @@ def delete_habit(habit_id):
 @dashboard_bp.route("/habits/search")
 @login_required
 def search_habits():
+    """
+    Allows the user to search for their habits
+    """
     user_id = str(current_user.id)
     query = request.args.get("q", "").strip()
 
@@ -249,6 +264,9 @@ def search_habits():
 
 # Streak Calculations
 def calculate_streak(habit_id, user_id):
+    ''' 
+    Calculates daily streaks from users who do their habits
+    '''
 
     #Calculates consecutive daily streak ending today.
 
@@ -275,4 +293,7 @@ def calculate_streak(habit_id, user_id):
 @dashboard_bp.route("/search")
 @login_required
 def search_page():
+    """
+    Search Page
+    """
     return render_template("search.html")
