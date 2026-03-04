@@ -9,6 +9,20 @@
 </head>
 
 <body>
+    <div style="position:absolute; top:20px; right:30px;">
+        <a href="{{ url_for('profile') }}" style="text-decoration:none;">
+            <button style="
+                padding:8px 14px;
+                border:none;
+                border-radius:6px;
+                background:#f0f2f5;
+                font-weight:bold;
+                cursor:pointer;
+            ">
+                👤 {{ current_user.username }}
+            </button>
+        </a>
+    </div>
     <div class="dashboard-wrapper">
     <h1>Welcome to MicroHabit Dashboard</h1>
 
