@@ -142,3 +142,7 @@ li span {
     text-decoration:none;
     color:black;
 }
+li form button{
+    width: auto;
+    padding: 6px 12px;
+}
