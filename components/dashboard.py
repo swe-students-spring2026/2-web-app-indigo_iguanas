@@ -5,12 +5,11 @@ Dashboard blueprints and routes for the Web App: Microhabit
 import os
 from datetime import datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, request
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, logout_user
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
-from flask_login import logout_user
 load_dotenv()
 
 dashboard_bp = Blueprint("dashboard", __name__)
@@ -62,7 +61,7 @@ def add_habit_page():
 @dashboard_bp.route("/habits", methods=["POST"])
 @login_required
 def create_habit():
-    data = request.form 
+    data = request.form
 
     name = (data.get("name") or "").strip()
     category = (data.get("category") or "").strip()
@@ -74,22 +73,22 @@ def create_habit():
 
     if not name:
         return render_template("addhabits.html", error="Name is required", form=data)
-    
+
     if habit_type not in {"binary", "count"}:
         return render_template("addhabits.html", error="Invalid habit type", form=data)
-    
+
     target = None
     if habit_type == "count":
         if not unit:
-            return render_template("addhabits.html", error="Unit is required for count habits", form=data)
+            return render_template("addhabits.html", error="Unit required for count", form=data)
         if not target_raw:
-            return render_template("addhabits.html", error="Target is required for count habits", form=data)
+            return render_template("addhabits.html", error="Target required for count", form=data)
         try:
             target = float(target_raw)
         except ValueError:
             return render_template("addhabits.html", error="Target must be a number", form=data)
         if target <= 0:
-            return render_template("addhabits.html", error="Target must be greater than zero", form=data)
+            return render_template("addhabits.html", error="Target must be > zero", form=data)
 
 
     new_habit = {
@@ -233,7 +232,7 @@ def search_habits():
 
     if not query:
         return render_template("search.html", habits=[])
-    
+
     habits = list(habit_collections.find({
         "userId": user_id,
         "name": {"$regex": query, "$options": "i"},
@@ -272,7 +271,7 @@ def calculate_streak(habit_id, user_id):
             break
 
     return streak
-    
+
 @dashboard_bp.route("/logout")
 @login_required
 def logout_page():
