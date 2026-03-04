@@ -4,6 +4,7 @@ Dashboard blueprints and routes for the Web App: Microhabit
 
 import os
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from pymongo import MongoClient
@@ -14,6 +15,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 dashboard_bp = Blueprint("dashboard", __name__)
+
+def today_str_local():
+    '''
+    This is to use local dates for the streaks to match their expectations 
+    '''
+    return datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 
 #Mongo Setup
 client = MongoClient(os.getenv("MONGO_URI"))
@@ -36,7 +43,7 @@ def dashboard():
         "archived": {"$ne": True}
     }))
 
-    today_str = datetime.utcnow().strftime("%Y-%m-%d")
+    today_str = today_str_local()
 
     for habit in habits:
         habit["_id"] = str(habit["_id"])
@@ -50,7 +57,7 @@ def dashboard():
         habit["completed_today"] = completion is not None
         habit["streak"] = calculate_streak(habit["_id"], user_id)
 
-    return render_template("dashboard.html", habits=habits)
+    return render_template("dashboard.html", habits=habits, today_str=today_str)
 
 
 @dashboard_bp.route("/habits/new", methods=["GET"])
@@ -124,7 +131,7 @@ def toggle_habit(habit_id):
     Checkbox for done today or not done today
     '''
     user_id = str(current_user.id)
-    today_str = datetime.utcnow().strftime("%Y-%m-%d")
+    today_str = today_str_local()
 
     completion = completions_collection.find_one({
         "habitId": habit_id,
@@ -312,7 +319,7 @@ def calculate_streak(habit_id, user_id):
     ''' 
     Calculates daily streaks from users who do their habits
     '''
-    today = datetime.utcnow().date()
+    today = datetime.now(ZoneInfo("America/New_York")).date()
     streak = 0
 
     while True:

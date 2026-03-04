@@ -27,15 +27,20 @@
             <span>{{ habit.name }}</span>
 
             <form method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
-                <input 
-                    type="checkbox"
-                    name="completed"
-                    onchange="this.form.submit()"
-                    {% if habit.completed_today %} checked {% endif %}
-                >
+                <button type="submit" class="primary-button small-button complete_btn">
+                    {% if habit.completed_today %}
+                    Incomplete
+                    {% else %} 
+                    Complete
+                    {% endif %}
+                </button>
             </form>
 
-            <span>{{ habit.streak }}</span>
+            <span class="streak-text">Streak: {{ habit.streak }}</span>
+
+            {% if today_str %} 
+            <span class="muted" style="text-align:center; margin-top:6px;">Today: {{today_str}}</span>
+            {% endif %}
 
             <div class="habit-actions">
                 <a href="{{ url_for('dashboard.edit_habit', habit_id=habit._id) }}" class="primary-button edit-btn">Edit </a>
@@ -51,8 +56,9 @@
        <p>No habits yet. Add one above </p>
    {% endif %}
     
-    <form action="{{ url_for('dashboard.search_page') }}" method="GET">
-        <button type="submit">Search Habits</button>
+    <form action="{{ url_for('dashboard.search_habits') }}" method="GET" style="margin-top: 12px;">
+        <input class="search-input" type="text" name="q" placeholder="Search habits by name..." aria-label="Search habits">
+        <button type="submit" class="primary-button small-button" style="width:auto">Search Habits</button>
     </form>
 
     <a href="/logout" class="logout-link">Logout</a>
