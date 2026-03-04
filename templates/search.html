@@ -18,23 +18,22 @@
     <input type="text" name="q" placeholder="Search habit name">
     <button type="submit">Search</button>
 </form>
-{% if habits is defined %}
-    {% if habits %}
+{% if habits %}
         <h2>Results</h2>
         <ul>
         {% for habit in habits %}
             <li>{{ habit.name }}</li>
         {% endfor %}
         </ul>
-    {% else %}
+    {% elif habits is not none %}
         <p>No habits found.</p>
     {% endif %}
-{% endif %}
+
 
 <form action="{{ url_for('dashboard.dashboard') }}">
     <button type="submit">Back to Dashboard</button>
 </form>
-<a href="{{ url_for('dashboard.logout_page') }}" class="logout-link">Logout</a>
+
 </div>
 
 </body>
