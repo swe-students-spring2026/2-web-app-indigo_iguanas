@@ -25,7 +25,7 @@
     {% if habits %}
        <ul>
     {% for habit in habits %}
-        <li>
+       <li>
             <span>{{ habit.name }}</span>
 
             <form method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
@@ -37,7 +37,11 @@
                 >
             </form>
 
-            <span> {{ habit.streak }}</span>
+            <span>{{ habit.streak }}</span>
+
+            <form method="POST" action="{{ url_for('dashboard.delete_habit', habit_id=habit._id) }}">
+                <button type="submit">Delete</button>
+            </form>
         </li>
     {% endfor %}
     </ul>
