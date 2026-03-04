@@ -10,6 +10,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.errors import InvalidId
 from dotenv import load_dotenv
+from flask_login import logout_user
 from datetime import timedelta
 load_dotenv()
 
@@ -70,6 +71,33 @@ def create_habit():
     habit_collections.insert_one(new_habit)
     return redirect(url_for("dashboard.dashboard"))
 
+@dashboard_bp.route("/toggle/<habit_id>", methods=["POST"])
+@login_required
+def toggle_habit(habit_id):
+
+    user_id = str(current_user.id)
+    today_str = datetime.utcnow().strftime("%Y-%m-%d")
+
+    completion = completions_collection.find_one({
+        "habitId": habit_id,
+        "userId": user_id,
+        "date": today_str
+    })
+
+    if completion:
+        # Uncheck → remove completion
+        completions_collection.delete_one({
+            "_id": completion["_id"]
+        })
+    else:
+        # Check → create completion
+        completions_collection.insert_one({
+            "habitId": habit_id,
+            "userId": user_id,
+            "date": today_str
+        })
+
+    return redirect(url_for("dashboard.dashboard"))
 
 # Create Habit Get
 @dashboard_bp.route("/createhabits", methods=["GET"])
@@ -185,7 +213,7 @@ def calculate_streak(habit_id, user_id):
 
     #Calculates consecutive daily streak ending today.
 
-    today = datetime.now().date()
+    today =  datetime.utcnow().date()
     streak = 0
 
     while True:
@@ -204,3 +232,15 @@ def calculate_streak(habit_id, user_id):
             break
 
     return streak
+    
+@dashboard_bp.route("/logout")
+@login_required
+def logout_page():
+    return render_template("logout.html")
+
+
+@dashboard_bp.route("/logout/confirm", methods=["POST"])
+@login_required
+def logout_confirm():
+    logout_user()
+    return redirect(url_for("login_route"))

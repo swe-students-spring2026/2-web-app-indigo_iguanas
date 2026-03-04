@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Logout</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+<div class="dashboard-wrapper">
+
+<h1>Logout</h1>
+
+<p>Are you sure you want to logout?</p>
+<div class="logout-actions">
+
+<form method="POST" action="{{ url_for('dashboard.logout_confirm') }}">
+    <button type="submit">Yes, Logout</button>
+</form>
+
+<a href="{{ url_for('dashboard.dashboard') }}">Cancel</a>
+
+</div>
+</body>
+</html>

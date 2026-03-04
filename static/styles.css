@@ -117,7 +117,17 @@ li {
     justify-content: space-between;
     align-items: center;
 }
+li input[type="checkbox"]{
+    width:20px;
+    height:20px;
+    cursor:pointer;
+}
 
 li span {
     font-weight: bold;
+}
+.logout-actions{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
 }

@@ -22,24 +22,31 @@
    <h2>Habit List</h2>
 
 
-   {% if habits %}
+    {% if habits %}
        <ul>
-           {% for habit in habits %}
-               <li>
-                   {{ habit.name }}
-                   {% if habit.completed_today %}
-                       Yes
-                   {% else %}
-                       No
-                   {% endif %}
-                   {{ habit.streak }}
-               </li>
-           {% endfor %}
-       </ul>
+    {% for habit in habits %}
+        <li>
+            <span>{{ habit.name }}</span>
+
+            <form method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
+                <input 
+                    type="checkbox"
+                    name="completed"
+                    onchange="this.form.submit()"
+                    {% if habit.completed_today %} checked {% endif %}
+                >
+            </form>
+
+            <span> {{ habit.streak }}</span>
+        </li>
+    {% endfor %}
+    </ul>
    {% else %}
        <p>No habits yet. Add one above </p>
    {% endif %}
-
+    <form action="{{ url_for('dashboard.logout_page') }}" method="GET">
+    <button type="submit">Logout</button>
+    </form>
 
    
 </div>
