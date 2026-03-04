@@ -120,6 +120,9 @@ def create_habit():
 @dashboard_bp.route("/toggle/<habit_id>", methods=["POST"])
 @login_required
 def toggle_habit(habit_id):
+    ''' 
+    Checkbox for done today or not done today
+    '''
     user_id = str(current_user.id)
     today_str = datetime.utcnow().strftime("%Y-%m-%d")
 
@@ -144,6 +147,9 @@ def toggle_habit(habit_id):
 @dashboard_bp.route("/createhabits", methods=["GET"])
 @login_required
 def create_habit_get():
+    '''
+    routes to the view habits page
+    '''
     user_id = str(current_user.id)
 
     habits = list(habit_collections.find({
