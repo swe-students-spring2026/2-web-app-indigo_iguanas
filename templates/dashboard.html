@@ -21,13 +21,13 @@
    <h2>Habit List</h2>
 
 
-    {% if habits %}
-       <ul>
+     {% if habits %}
+         <ul class="habit-list">
     {% for habit in habits %}
-       <li>
-            <span>{{ habit.name }}</span>
+         <li class="habit-row">
+                <span class="habit-name">{{ habit.name }}</span>
 
-            <form method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
+                <form class="complete-form" method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
                 <button type="submit" class="primary-button small-button complete_btn">
                     {% if habit.completed_today %}
                     Incomplete
@@ -37,13 +37,14 @@
                 </button>
             </form>
 
-            <span class="streak-text">Streak: {{ habit.streak }}</span>
+            <div class="streak-group">
+                <span class="streak-text">Streak: {{ habit.streak }}</span>
+                {% if today_str %}
+                <span class="muted">Today: {{today_str}}</span>
+                {% endif %}
+            </div>
 
-            {% if today_str %} 
-            <span class="muted" style="text-align:center; margin-top:6px;">Today: {{today_str}}</span>
-            {% endif %}
-
-            <div class="habit-actions">
+            <div class="habit-actions row-actions">
                 <a href="{{ url_for('dashboard.edit_habit', habit_id=habit._id) }}" class="primary-button edit-btn">Edit </a>
 
             <form method="POST" action="{{ url_for('dashboard.delete_habit', habit_id=habit._id) }}">
