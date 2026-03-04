@@ -54,6 +54,11 @@ def dashboard():
 
     return render_template("dashboard.html", habits=habits)
 
+@dashboard_bp.route("/habits/new", methods=["GET"])
+@login_required
+def add_habit_page():
+    return render_template("add_habits.html")
+
 # Create Habit
 @dashboard_bp.route("/habits", methods=["POST"])
 @login_required
