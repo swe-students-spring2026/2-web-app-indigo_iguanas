@@ -1,3 +1,12 @@
+## Team members
+
+[Kyle Chen](https://github.com/KyleC55)<br>
+[]()<br>
+[]()<br>
+[]()<br>
+[]()<br>
+
+
 # Web Application Exercise
 
 A little exercise to build a web application following an agile development process. See the [instructions](instructions.md) for more detail.
@@ -15,7 +24,7 @@ Link To Task Board: https://github.com/orgs/swe-students-spring2026/projects/73 
 ## Steps necessary to run the software
 
 ### 1. Clone the Repository
-Run:
+Open The Terminal:
 git clone https://github.com/swe-students-spring2026/2-web-app-indigo_iguanas.git
 cd 2-web-app-indigo_iguanas
 
