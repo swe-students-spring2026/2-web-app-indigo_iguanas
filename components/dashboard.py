@@ -284,13 +284,9 @@ def toggle_habit(habit_id):
     if required < 1:
         required = 1
 
-    completion = completions_collection.find_one(
-        {
-            "habitId": habit_id,
-            "userId": user_id,
-            "date": today_str,
-        }
-    )
+    next_url = (request.form.get("next") or request.args.get("next") or "").strip()
+    if not next_url.startswith("/"):
+        next_url = ""
 
     if action == "decrement":
         if completion:

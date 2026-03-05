@@ -8,20 +8,21 @@
 </head>
 
 <body>
-    <div class = "top-button">
-        <a href="{{ url_for('dashboard.dashboard') }}" style="text-decoration:none;">
-            <button style="
-                padding:8px 14px;
-                border:none;
-                border-radius:6px;
-                background:#f0f2f5;
-                font-weight:bold;
-                cursor:pointer;
-            ">
-                Dashboard
-            </button>
-        </a>
-    </div>
+  <div class="top-button">
+    <a href="{{ url_for('dashboard.dashboard') }}" style="text-decoration:none;">
+      <button style="
+          padding:8px 14px;
+          border:none;
+          border-radius:6px;
+          background:#f0f2f5;
+          font-weight:bold;
+          cursor:pointer;
+      ">
+          Dashboard
+      </button>
+    </a>
+  </div>
+
   <div class="dashboard-wrapper">
     <h1>Profile</h1>
 
@@ -29,20 +30,20 @@
       <li class="habit-card">
         <div><strong>Username:</strong> {{ user.get("username", "Unknown") if user else "Unknown" }}</div>
         <div><strong>Email:</strong> {{ user.get("email", "N/A") if user else "N/A" }}</div>
-        <div><strong>Member Since:</strong> {{ member_since }}</div>
+        <div><strong>Member Since:</strong> {{ member_since if member_since is defined else "N/A" }}</div>
       </li>
     </ul>
 
     <h2>Statistics</h2>
     <ul class="habit-list">
-      <li class="habit-card"><strong>Total Habits:</strong> {{ total_habits }}</li>
-      <li class="habit-card"><strong>Total Completions:</strong> {{ total_completions }}</li>
-      <li class="habit-card"><strong>Best Streak:</strong> {{ best_streak }}</li>
+      <li class="habit-card"><strong>Total Habits:</strong> {{ total_habits if total_habits is defined else (habit_count if habit_count is defined else 0) }}</li>
+      <li class="habit-card"><strong>Active Habits:</strong> {{ active_count if active_count is defined else "—" }}</li>
+      <li class="habit-card"><strong>Total Completions:</strong> {{ total_completions if total_completions is defined else "—" }}</li>
+      <li class="habit-card"><strong>Best Streak:</strong> {{ best_streak if best_streak is defined else "—" }}</li>
     </ul>
 
     <h2>Habits</h2>
-
-    {% if habits and habits|length > 0 %}
+    {% if habits is defined and habits|length > 0 %}
       <ul class="habit-list">
         {% for habit in habits %}
           <li class="habit-card">
@@ -56,8 +57,8 @@
                 </div>
 
                 <div class="habit-meta">
-                  <div><strong>Current Streak:</strong> {{ habit.streak }}</div>
-                  <div class="muted"><strong>Completed (all time):</strong> {{ habit.completion_count }}</div>
+                  <div><strong>Current Streak:</strong> {{ habit.streak if habit.streak is defined else "—" }}</div>
+                  <div class="muted"><strong>Completed (all time):</strong> {{ habit.completion_count if habit.completion_count is defined else "—" }}</div>
                   {% if habit.notes %}
                     <div class="muted">{{ habit.notes }}</div>
                   {% endif %}
@@ -72,9 +73,7 @@
     {% endif %}
 
     <div class="bottom-actions">
-      <a href="{{ url_for('edit_profile') }}" style="text-decoration:none;">
-         <button class="primary-button">Edit Profile</button>
-      </a>
+      <a href="{{ url_for('edit_profile') }}" class="primary-button">Edit Profile</a>
       <a href="{{ url_for('dashboard.dashboard') }}" class="primary-button">Back to Dashboard</a>
 
       <a href="{{ url_for('dashboard.create_habit_get') }}" class="logout-link">View Habits</a>
