@@ -78,37 +78,33 @@
                     {{ goal.get('value', 1) }}
                     {{ goal.get('unit', 'times') }}
                     per {{ goal.get('period', 'day') }}
-                </div>
-
-                  <div class="muted">
-                    <strong>Today:</strong>
-                    {% if habit.completed_today_count >= (goal.get('value', 1) | float) %}
-                      Completed
-                    {% else %}
-                      {{ habit.completed_today_count }} completed
-                    {% endif %}
                   </div>
                 </div>
               </div>
 
-              <div class="habit-actions habit-card-actions">
-                <form method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
-                  <input type="hidden" name="next" value="{{ request.full_path }}">
-                  <button type="submit" class="primary-button small-button">Complete +1</button>
-                </form>
-
-                <form method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
-                  <input type="hidden" name="next" value="{{ request.full_path }}">
-                  <input type="hidden" name="action" value="decrement">
-                  <button type="submit" class="primary-button small-button">Undo -1</button>
-                </form>
-
+              <div class="habit-actions" style="display:flex; gap:10px; align-items:center;">
                 <a
                   href="{{ url_for('dashboard.edit_habit', habit_id=habit._id) }}"
                   class="primary-button small-button"
                 >
                   Edit
                 </a>
+                
+
+                <form
+                  method="POST"
+                  action="{{ url_for('dashboard.delete_habit', habit_id=habit._id) }}"
+                  style="margin:0;"
+                >
+                <button 
+                  type="submit" 
+                  class="primary-button small-button"
+                  style="background:#e74c3c;"
+                  onclick="return confirm('Delete this habit? This cannot be undone.')"
+                >
+                  Delete
+                </button>
+                </form>
               </div>
             </div>
           </li>
