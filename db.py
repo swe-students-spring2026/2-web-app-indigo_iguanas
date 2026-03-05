@@ -1,3 +1,7 @@
+"""
+Database Setup for Microhabit
+"""
+
 import os
 import datetime
 import pymongo
@@ -23,9 +27,7 @@ client.admin.command('ping')  # Check if the connection is successful
 
 
 
-test = False
-
-if __name__ == "__main__" and test:
+if __name__ == "__main__":
 
     user = users.insert_one({
         'username': "test_user",

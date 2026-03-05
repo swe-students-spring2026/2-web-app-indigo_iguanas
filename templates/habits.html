@@ -109,6 +109,22 @@
                 >
                   Edit
                 </a>
+                
+
+                <form
+                  method="POST"
+                  action="{{ url_for('dashboard.delete_habit', habit_id=habit._id) }}"
+                  style="margin:0;"
+                >
+                <button 
+                  type="submit" 
+                  class="primary-button small-button"
+                  style="background:#e74c3c;"
+                  onclick="return confirm('Delete this habit? This cannot be undone.')"
+                >
+                  Delete
+                </button>
+                </form>
               </div>
             </div>
           </li>

@@ -1,15 +1,11 @@
-"""
-MicroHabit Flask application, creates the Flask app, allows us to register, define core routes,
-such as login, register, profile, and logout pages. 
-"""
-import os
+import os 
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 
 from flask import Flask, render_template, redirect, url_for, request
 from flask_login import LoginManager, login_user, logout_user, UserMixin, login_required, current_user
 
-from db import db, users, habits
+from db import db, users, habits 
 from components.dashboard import dashboard_bp
 
 load_dotenv()
@@ -61,13 +57,13 @@ def app():
 
         username = request.form.get("username")
         password = request.form.get("password")
-
+    
         existingUser = users.find_one({"username": username})
         if existingUser and existingUser.get("password") == password:
             user = User()
             user.id = str(existingUser["_id"])
             user.username = existingUser.get("username")
-
+            
             login_user(user)
             print("I have logged in")
             return redirect(url_for("dashboard.dashboard"))
@@ -87,25 +83,24 @@ def app():
             return render_template("register.html", error="Username already taken")
         if users.find_one({"email": email}):
             return render_template("register.html", error="Email already exists.")
-
+        
         users.insert_one({"username": username, "email":email, "password":password})
         return render_template("login.html", message="Registration complete! Please login.")
-
+    
 
     ##### user profile page
 
     @app.route("/profile")
     @login_required
     def profile():
-        # 1) get the logged-in user's document from Mongo
+        # get the user's document from Mongo
         user_doc = users.find_one({"_id": ObjectId(current_user.id)})
 
         if not user_doc:
             # if somehow the session exists but the user doesn't
             return redirect(url_for("login_route"))
 
-        # 2) compute stats (adjust query to match your habits schema)
-        # Most likely in your repo habits use "userId" as a string
+       
         habit_count = habits.count_documents({"userId": str(current_user.id)})
 
         active_count = habits.count_documents({
@@ -125,9 +120,9 @@ def app():
             active_count=active_count,
             best_streak=best_streak,
         )
+    
 
-
-    ##### edit profile
+    ##### edit profile 
 
     @app.route("/profile/edit", methods=["GET", "POST"])
     @login_required
@@ -139,26 +134,62 @@ def app():
         if request.method == "GET":
             return render_template("editprofile.html", user=user_doc)
 
-        # POST: read form fields
+        # --- POST: update username/email + optional password change
         username = (request.form.get("username") or "").strip()
         email = (request.form.get("email") or "").strip()
 
-        # basic validation
+        current_password = (request.form.get("current_password") or "")
+        new_password = (request.form.get("new_password") or "")
+        confirm_password = (request.form.get("confirm_password") or "")
+
+        # basic validation for profile fields
         if not username:
             return render_template("editprofile.html", user=user_doc, error="Username is required.")
 
         if email and ("@" not in email or "." not in email):
             return render_template("editprofile.html", user=user_doc, error="Enter a valid email.")
 
-        # update db
+        update_fields = {"username": username, "email": email}
+
+        wants_password_change = bool(new_password or confirm_password or current_password)
+
+        if wants_password_change:
+            if not current_password or not new_password or not confirm_password:
+                return render_template(
+                    "editprofile.html",
+                    user=user_doc,
+                    error="To change your password, fill out current, new, and confirm password."
+                )
+
+            if user_doc.get("password") != current_password:
+                return render_template(
+                    "editprofile.html",
+                    user=user_doc,
+                    error="Current password is incorrect."
+                )
+
+            if new_password != confirm_password:
+                return render_template(
+                    "editprofile.html",
+                    user=user_doc,
+                    error="New password and confirmation do not match."
+                )
+
+            if len(new_password) < 6:
+                return render_template(
+                    "editprofile.html",
+                    user=user_doc,
+                    error="New password must be at least 6 characters."
+                )
+
+            update_fields["password"] = new_password
+
         users.update_one(
             {"_id": ObjectId(current_user.id)},
-            {"$set": {"username": username, "email": email}}
+            {"$set": update_fields}
         )
 
         return redirect(url_for("profile"))
-
-    ########
 
     #logout stuff
     @app.route("/logout")
@@ -170,11 +201,13 @@ def app():
 
 app_instance = app()
 
-#I have no idea what this is but it seems necessary
-#lowk copy pasted professors code from example app
+#I have no idea what this is but it seems necessary 
+#lowk copy pasted professors code from example app 
 if __name__ == "__main__":
     FLASK_PORT = int(os.getenv("FLASK_PORT", "5000"))
     FLASK_ENV = os.getenv("FLASK_ENV")
     print(f"FLASK_ENV: {FLASK_ENV}, FLASK_PORT: {FLASK_PORT}")
 
-    app_instance.run(port=FLASK_PORT)
+    app_instance.run(port=FLASK_PORT) 
+
+
