@@ -39,6 +39,18 @@
       <label for="email">Email</label>
       <input id="email" name="email" type="email" value="{{ user.get('email','') }}">
 
+      <h2 style="margin-top:24px;">Change Password</h2>
+
+      <label for="current_password">Current Password</label>
+      <input id="current_password" name="current_password" type="password" placeholder="Current password">
+
+      <label for="new_password">New Password</label>
+      <input id="new_password" name="new_password" type="password" placeholder="New password">
+
+      <label for="confirm_password">Confirm New Password</label>
+      <input id="confirm_password" name="confirm_password" type="password" placeholder="Confirm new password">
+
+
       <div class="bottom-actions" style="width:100%;">
         <button type="submit" class="primary-button">Save Changes</button>
         <a href="{{ url_for('profile') }}" class="logout-link">Cancel</a>
