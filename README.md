@@ -74,6 +74,8 @@ python3 app.py
 ```
 You can login or register for your account, and start logging habits! 
 
+Open: http://127.0.0.1:5000/ on your browswer
+
 Here are some test accounts:
 Username: admin
 Password: 12345678
