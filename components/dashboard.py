@@ -29,6 +29,54 @@ habit_collections = db["habits"]
 completions_collection = db["completions"]
 users_collection = db["users"]
 
+def parse_int(value, default=None):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+def parse_float(value, default=None):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+def should_show_today(habit, today_dt):
+    schedule = habit.get("schedule") or {}
+    schedule_type = schedule.get("type", habit.get("frequency", "daily"))
+
+    if schedule_type == "daily":
+        return True 
+    
+    if schedule_type in {"weekly", "biweekly"}:
+        interval = 7 if schedule_type == "weekly" else 14
+        start_str = schedule.get("start_date")
+
+        if not start_str:
+            created = habit.get("createdAt")
+            if created and hasattr(created, "strftime"):
+                start_str = created.strftime("%Y-%m-%d")
+            
+            if not start_str:
+                return True
+            
+            try:
+                start_dt = datetime.striptime(start_str, "%Y-%m-%d").date()
+            except Exception:
+                return True
+            
+            delta = (today_dt - start_dt).days
+            return delta >= 0 and (delta % interval == 0)
+        
+        if schedule_type == "monthly":
+            start_str = schedule.get("start_date")
+            if not start_str:
+                created = habit.get("createdAt")
+                if created and hasattr(created, "shrftime"):
+                    start_str = created.strftime("%Y-%m-%d")
+            day =1 
+
+
 
 #Dashboard view
 @dashboard_bp.route("/dashboard")
