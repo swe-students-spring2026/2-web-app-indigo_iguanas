@@ -1,54 +1,66 @@
 """
 MicroHabit Flask application, creates the Flask app, allows us to register, define core routes,
-such as login, register, profile, and logout pages. 
+such as login, register, profile, and logout pages.
 """
 import os
+from typing import Optional
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
+from bson.errors import InvalidId
 
 from flask import Flask, render_template, redirect, url_for, request
-from flask_login import LoginManager, login_user, logout_user, UserMixin, login_required, current_user
+from flask_login import (
+    LoginManager,
+    login_user,
+    logout_user,
+    UserMixin,
+    login_required,
+    current_user,
+)
 
 from db import db, users, habits
 from components.dashboard import dashboard_bp
 
 load_dotenv()
 
-def app():
+
+def create_app():
+    '''
+    Creates and configures Microhabit, it loads, initializes and sets up the flask
+    '''
     app = Flask(__name__)
 
     app.secret_key = os.getenv("SECRET_KEY", "dev-secret")
 
-    #link app to dashboard.py
     app.register_blueprint(dashboard_bp)
 
     app.db = db
     app.users = users
     app.habits = habits
 
-    #login stuff
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "login_route"
 
-    #for login stuff
     class User(UserMixin):
-        pass
+        """ Flask-Login user wrapper around Mongo user document"""
+        def __init__(self, user_id: str, username: Optional[str] = None):
+            self.id = user_id
+            self.username = username
 
-    #load in user id after login
     @login_manager.user_loader
     def load_user(user_id):
         try:
             data = users.find_one({"_id": ObjectId(user_id)})
-        except Exception:
+        except (InvalidId, TypeError):
             return None
         if not data:
             return None
 
-        user = User()
-        user.id = str(data["_id"])
-        user.username = data.get("username")
-        return user
+        return User(
+            user_id=str(data["_id"]),
+            username=data.get("username"),
+        )
 
     @app.route("/")
     def home():
@@ -62,17 +74,18 @@ def app():
         username = request.form.get("username")
         password = request.form.get("password")
 
-        existingUser = users.find_one({"username": username})
-        if existingUser and existingUser.get("password") == password:
-            user = User()
-            user.id = str(existingUser["_id"])
-            user.username = existingUser.get("username")
+        existing_user = users.find_one({"username": username})
+        if existing_user and existing_user.get("password") == password:
+            user = User(
+                user_id=str(existing_user["_id"]),
+                username=existing_user.get("username"),
+            )
 
             login_user(user)
             print("I have logged in")
             return redirect(url_for("dashboard.dashboard"))
-        else:
-            return render_template("login.html", error="User/Password")
+
+        return render_template("login.html", error="User/Password")
 
     @app.route("/register", methods=["POST", "GET"])
     def signup():
@@ -88,24 +101,17 @@ def app():
         if users.find_one({"email": email}):
             return render_template("register.html", error="Email already exists.")
 
-        users.insert_one({"username": username, "email":email, "password":password})
+        users.insert_one({"username": username, "email": email, "password": password})
         return render_template("login.html", message="Registration complete! Please login.")
-
-
-    ##### user profile page
 
     @app.route("/profile")
     @login_required
     def profile():
-        # 1) get the logged-in user's document from Mongo
         user_doc = users.find_one({"_id": ObjectId(current_user.id)})
 
         if not user_doc:
-            # if somehow the session exists but the user doesn't
             return redirect(url_for("login_route"))
 
-        # 2) compute stats (adjust query to match your habits schema)
-        # Most likely in your repo habits use "userId" as a string
         habit_count = habits.count_documents({"userId": str(current_user.id)})
 
         active_count = habits.count_documents({
@@ -113,7 +119,7 @@ def app():
             "archived": {"$ne": True}
         })
 
-        best_streak = "—"
+        best_streak = "-"
 
         member_since = user_doc.get("created_at", "N/A")
 
@@ -126,9 +132,6 @@ def app():
             best_streak=best_streak,
         )
 
-
-    ##### edit profile
-
     @app.route("/profile/edit", methods=["GET", "POST"])
     @login_required
     def edit_profile():
@@ -139,18 +142,15 @@ def app():
         if request.method == "GET":
             return render_template("editprofile.html", user=user_doc)
 
-        # POST: read form fields
         username = (request.form.get("username") or "").strip()
         email = (request.form.get("email") or "").strip()
 
-        # basic validation
         if not username:
             return render_template("editprofile.html", user=user_doc, error="Username is required.")
 
         if email and ("@" not in email or "." not in email):
             return render_template("editprofile.html", user=user_doc, error="Enter a valid email.")
 
-        # update db
         users.update_one(
             {"_id": ObjectId(current_user.id)},
             {"$set": {"username": username, "email": email}}
@@ -158,20 +158,17 @@ def app():
 
         return redirect(url_for("profile"))
 
-    ########
-
-    #logout stuff
     @app.route("/logout")
     @login_required
     def logout_route():
         logout_user()
         return redirect(url_for("login_route"))
+
     return app
 
-app_instance = app()
 
-#I have no idea what this is but it seems necessary
-#lowk copy pasted professors code from example app
+app_instance = create_app()
+
 if __name__ == "__main__":
     FLASK_PORT = int(os.getenv("FLASK_PORT", "5000"))
     FLASK_ENV = os.getenv("FLASK_ENV")
