@@ -1,28 +1,30 @@
 '''
-Dashboard blueprints and routes for the Web App: Microhabit 
+Dashboard blueprints and routes for the Web App: Microhabit
 '''
 
 import os
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+
+from bson.errors import InvalidId
+from bson.objectid import ObjectId
+from dotenv import load_dotenv
 from flask import Blueprint, render_template, redirect, url_for, request
 from flask_login import login_required, current_user
 from pymongo import MongoClient
-from bson.objectid import ObjectId
-from bson.errors import InvalidId
-from dotenv import load_dotenv
 
 load_dotenv()
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
+
 def today_str_local():
     '''
-    This is to use local dates for the streaks to match their expectations 
+    This is to use local dates for the streaks to match their expectations
     '''
     return datetime.now(ZoneInfo("America/New_York")).strftime("%Y-%m-%d")
 
-#Mongo Setup
+
 client = MongoClient(os.getenv("MONGO_URI"))
 db = client[os.getenv("MONGO_DBNAME")]
 habit_collections = db["habits"]
@@ -30,7 +32,6 @@ completions_collection = db["completions"]
 users_collection = db["users"]
 
 
-#Dashboard view
 @dashboard_bp.route("/dashboard")
 @login_required
 def dashboard():
@@ -39,21 +40,27 @@ def dashboard():
     """
     user_id = str(current_user.id)
 
-    habits = list(habit_collections.find({
-        "userId": user_id,
-        "archived": {"$ne": True}
-    }))
+    habits = list(
+        habit_collections.find(
+            {
+                "userId": user_id,
+                "archived": {"$ne": True},
+            }
+        )
+    )
 
     today_str = today_str_local()
 
     for habit in habits:
         habit["_id"] = str(habit["_id"])
 
-        completion = completions_collection.find_one({
-            "habitId": habit["_id"],
-            "userId": user_id,
-            "date": today_str
-        })
+        completion = completions_collection.find_one(
+            {
+                "habitId": habit["_id"],
+                "userId": user_id,
+                "date": today_str,
+            }
+        )
 
         habit["completed_today"] = completion is not None
         habit["streak"] = calculate_streak(habit["_id"], user_id)
@@ -95,15 +102,31 @@ def create_habit():
     target = None
     if habit_type == "count":
         if not unit:
-            return render_template("addhabits.html", error="Unit required for count", form=data)
+            return render_template(
+                "addhabits.html",
+                error="Unit required for count",
+                form=data,
+            )
         if not target_raw:
-            return render_template("addhabits.html", error="Target required for count", form=data)
+            return render_template(
+                "addhabits.html",
+                error="Target required for count",
+                form=data,
+            )
         try:
             target = float(target_raw)
         except ValueError:
-            return render_template("addhabits.html", error="Target must be a number", form=data)
+            return render_template(
+                "addhabits.html",
+                error="Target must be a number",
+                form=data,
+            )
         if target <= 0:
-            return render_template("addhabits.html", error="Target must be > zero", form=data)
+            return render_template(
+                "addhabits.html",
+                error="Target must be > zero",
+                form=data,
+            )
 
     new_habit = {
         "userId": str(current_user.id),
@@ -128,26 +151,30 @@ def create_habit():
 @dashboard_bp.route("/toggle/<habit_id>", methods=["POST"])
 @login_required
 def toggle_habit(habit_id):
-    ''' 
+    '''
     Checkbox for done today or not done today
     '''
     user_id = str(current_user.id)
     today_str = today_str_local()
 
-    completion = completions_collection.find_one({
-        "habitId": habit_id,
-        "userId": user_id,
-        "date": today_str
-    })
+    completion = completions_collection.find_one(
+        {
+            "habitId": habit_id,
+            "userId": user_id,
+            "date": today_str,
+        }
+    )
 
     if completion:
         completions_collection.delete_one({"_id": completion["_id"]})
     else:
-        completions_collection.insert_one({
-            "habitId": habit_id,
-            "userId": user_id,
-            "date": today_str
-        })
+        completions_collection.insert_one(
+            {
+                "habitId": habit_id,
+                "userId": user_id,
+                "date": today_str,
+            }
+        )
 
     return redirect(url_for("dashboard.dashboard"))
 
@@ -160,10 +187,14 @@ def create_habit_get():
     '''
     user_id = str(current_user.id)
 
-    habits = list(habit_collections.find({
-        "userId": user_id,
-        "archived": {"$ne": True}
-    }))
+    habits = list(
+        habit_collections.find(
+            {
+                "userId": user_id,
+                "archived": {"$ne": True},
+            }
+        )
+    )
 
     for h in habits:
         h["_id"] = str(h["_id"])
@@ -228,7 +259,11 @@ def edit_habit(habit_id):
             if target <= 0:
                 habit["_id"] = str(habit["_id"])
                 habit["type"] = habit.get("type", "binary")
-                return render_template("edithabit.html", habit=habit, error="Target must be > zero")
+                return render_template(
+                    "edithabit.html",
+                    habit=habit,
+                    error="Target must be > zero",
+                )
 
         set_fields = {
             "name": name,
@@ -283,10 +318,12 @@ def delete_habit(habit_id):
 
     habit_collections.delete_one({"_id": oid, "userId": user_id})
 
-    completions_collection.delete_many({
-        "habitId": habit_id,
-        "userId": user_id
-    })
+    completions_collection.delete_many(
+        {
+            "habitId": habit_id,
+            "userId": user_id,
+        }
+    )
 
     return redirect(url_for("dashboard.dashboard"))
 
@@ -302,7 +339,7 @@ def search_habits():
 
     mongo_query = {
         "userId": user_id,
-        "archived": {"$ne": True}
+        "archived": {"$ne": True},
     }
 
     if query:
@@ -317,7 +354,7 @@ def search_habits():
 
 
 def calculate_streak(habit_id, user_id):
-    ''' 
+    '''
     Calculates daily streaks from users who do their habits
     '''
     today = datetime.now(ZoneInfo("America/New_York")).date()
@@ -326,11 +363,13 @@ def calculate_streak(habit_id, user_id):
     while True:
         date_str = today.strftime("%Y-%m-%d")
 
-        exists = completions_collection.find_one({
-            "habitId": habit_id,
-            "userId": user_id,
-            "date": date_str
-        })
+        exists = completions_collection.find_one(
+            {
+                "habitId": habit_id,
+                "userId": user_id,
+                "date": date_str,
+            }
+        )
 
         if exists:
             streak += 1
@@ -339,6 +378,7 @@ def calculate_streak(habit_id, user_id):
             break
 
     return streak
+
 
 @dashboard_bp.route("/profile")
 @login_required
@@ -355,7 +395,10 @@ def profile():
         user = None
 
     if not user:
-        user = users_collection.find_one({"userId": user_id}) or users_collection.find_one({"_id": user_id})
+        user = (
+            users_collection.find_one({"userId": user_id})
+            or users_collection.find_one({"_id": user_id})
+        )
 
     member_since = "N/A"
     if user:
@@ -363,14 +406,26 @@ def profile():
         if created:
             try:
                 member_since = created.strftime("%Y-%m-%d")
-            except Exception:
+            except (AttributeError, TypeError, ValueError):
                 member_since = str(created)
 
-    habits = list(habit_collections.find({"userId": user_id, "archived": {"$ne": True}}))
+    habits = list(
+        habit_collections.find(
+            {
+                "userId": user_id,
+                "archived": {"$ne": True},
+            }
+        )
+    )
     for h in habits:
         h["_id"] = str(h["_id"])
         h["streak"] = calculate_streak(h["_id"], user_id)
-        h["completion_count"] = completions_collection.count_documents({"userId": user_id, "habitId": h["_id"]})
+        h["completion_count"] = completions_collection.count_documents(
+            {
+                "userId": user_id,
+                "habitId": h["_id"],
+            }
+        )
 
     total_habits = len(habits)
     total_completions = completions_collection.count_documents({"userId": user_id})
@@ -383,8 +438,9 @@ def profile():
         habits=habits,
         total_habits=total_habits,
         total_completions=total_completions,
-        best_streak=best_streak
+        best_streak=best_streak,
     )
+
 
 @dashboard_bp.route("/search")
 @login_required
