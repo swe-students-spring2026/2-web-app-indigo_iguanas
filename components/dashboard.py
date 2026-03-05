@@ -27,6 +27,7 @@ client = MongoClient(os.getenv("MONGO_URI"))
 db = client[os.getenv("MONGO_DBNAME")]
 habit_collections = db["habits"]
 completions_collection = db["completions"]
+users_collection = db["users"]
 
 
 #Dashboard view
@@ -339,6 +340,51 @@ def calculate_streak(habit_id, user_id):
 
     return streak
 
+@dashboard_bp.route("/profile")
+@login_required
+def profile():
+    '''
+    Allows Us to get the profile page
+    '''
+    user_id = str(current_user.id)
+
+    user = None
+    try:
+        user = users_collection.find_one({"_id": ObjectId(user_id)})
+    except (InvalidId, TypeError):
+        user = None
+
+    if not user:
+        user = users_collection.find_one({"userId": user_id}) or users_collection.find_one({"_id": user_id})
+
+    member_since = "N/A"
+    if user:
+        created = user.get("createdAt") or user.get("created_at") or user.get("created")
+        if created:
+            try:
+                member_since = created.strftime("%Y-%m-%d")
+            except Exception:
+                member_since = str(created)
+
+    habits = list(habit_collections.find({"userId": user_id, "archived": {"$ne": True}}))
+    for h in habits:
+        h["_id"] = str(h["_id"])
+        h["streak"] = calculate_streak(h["_id"], user_id)
+        h["completion_count"] = completions_collection.count_documents({"userId": user_id, "habitId": h["_id"]})
+
+    total_habits = len(habits)
+    total_completions = completions_collection.count_documents({"userId": user_id})
+    best_streak = max([h["streak"] for h in habits], default=0)
+
+    return render_template(
+        "profile.html",
+        user=user,
+        member_since=member_since,
+        habits=habits,
+        total_habits=total_habits,
+        total_completions=total_completions,
+        best_streak=best_streak
+    )
 
 @dashboard_bp.route("/search")
 @login_required
