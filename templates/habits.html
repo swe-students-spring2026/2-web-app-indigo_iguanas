@@ -25,6 +25,9 @@
           <button type="submit" class="primary-button smallbutton" style="width:auto">
             Search
           </button>
+
+          <a href="{{ url_for('dashboard.create_habit_get') }}" class="logout-link">Clear search</a>
+          
         </form>
       </div>
     </div>
@@ -45,7 +48,7 @@
 
                 <div class="habit-meta">
                   {% if habit.notes %}
-                    <div class="muted">{{ habit.notes }}</div>
+                    <div class="muted"><strong>Description:</strong> {{ habit.notes }}</div>
                   {% endif %}
 
                   {% set sched = habit.schedule if habit.schedule else {'type': habit.frequency if habit.frequency else 'daily'} %}
@@ -76,10 +79,30 @@
                     {{ goal.get('unit', 'times') }}
                     per {{ goal.get('period', 'day') }}
                 </div>
+
+                  <div class="muted">
+                    <strong>Today:</strong>
+                    {% if habit.completed_today_count >= (goal.get('value', 1) | float) %}
+                      Completed
+                    {% else %}
+                      {{ habit.completed_today_count }} completed
+                    {% endif %}
+                  </div>
                 </div>
               </div>
 
-              <div class="habit-actions">
+              <div class="habit-actions habit-card-actions">
+                <form method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
+                  <input type="hidden" name="next" value="{{ request.full_path }}">
+                  <button type="submit" class="primary-button small-button">Complete +1</button>
+                </form>
+
+                <form method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
+                  <input type="hidden" name="next" value="{{ request.full_path }}">
+                  <input type="hidden" name="action" value="decrement">
+                  <button type="submit" class="primary-button small-button">Undo -1</button>
+                </form>
+
                 <a
                   href="{{ url_for('dashboard.edit_habit', habit_id=habit._id) }}"
                   class="primary-button small-button"
@@ -101,7 +124,6 @@
 
     <div class="bottom-actions">
       <a href="{{ url_for('dashboard.add_habit_page') }}" class="primary-button">Add Habit</a>
-      <a href="{{ url_for('dashboard.create_habit_get') }}" class="logout-link">Clear search</a>
       <a href="{{ url_for('dashboard.dashboard') }}" class="logout-link">Back to Dashboard</a>
     </div>
 
