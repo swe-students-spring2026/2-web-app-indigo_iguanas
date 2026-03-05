@@ -46,8 +46,8 @@ def should_show_today(habit, today_dt):
     schedule_type = schedule.get("type", habit.get("frequency", "daily"))
 
     if schedule_type == "daily":
-        return True
-
+        return True 
+    
     if schedule_type in {"weekly", "biweekly"}:
         interval = 7 if schedule_type == "weekly" else 14
         start_str = schedule.get("start_date")
@@ -56,40 +56,26 @@ def should_show_today(habit, today_dt):
             created = habit.get("createdAt")
             if created and hasattr(created, "strftime"):
                 start_str = created.strftime("%Y-%m-%d")
-
-        if not start_str:
-            return True
-
-        try:
-            start_dt = datetime.strptime(start_str, "%Y-%m-%d").date()
-        except Exception:
-            return True
-
-        delta = (today_dt - start_dt).days
-        return delta >= 0 and (delta % interval == 0)
-
-    if schedule_type == "monthly":
-        start_str = schedule.get("start_date")
-        if not start_str:
-            created = habit.get("createdAt")
-            if created and hasattr(created, "strftime"):
-                start_str = created.strftime("%Y-%m-%d")
-
-        day = 1
-        if start_str:
+            
+            if not start_str:
+                return True
+            
             try:
-                start_dt = datetime.strptime(start_str, "%Y-%m-%d").date()
-                day = start_dt.day
+                start_dt = datetime.striptime(start_str, "%Y-%m-%d").date()
             except Exception:
-                day = 1
+                return True
+            
+            delta = (today_dt - start_dt).days
+            return delta >= 0 and (delta % interval == 0)
+        
+        if schedule_type == "monthly":
+            start_str = schedule.get("start_date")
+            if not start_str:
+                created = habit.get("createdAt")
+                if created and hasattr(created, "shrftime"):
+                    start_str = created.strftime("%Y-%m-%d")
+            day =1 
 
-        return today_dt.day == day
-
-    if schedule_type == "custom":
-        days = schedule.get("custom_days") or []
-        return today_dt.weekday() in set(days)
-
-    return True
 
 
 @dashboard_bp.route("/dashboard")
