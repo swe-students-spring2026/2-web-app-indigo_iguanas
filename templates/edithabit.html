@@ -16,6 +16,9 @@
       <p class="error">{{ error }}</p>
     {% endif %}
 
+    {% set sched = habit.schedule if habit.schedule else {'type': habit.frequency if habit.frequency else 'daily', 'custom_days': []} %}
+    {% set goal = habit.goal if habit.goal else {'value': 1, 'unit': 'times', 'period': 'day'} %}
+
     <form method="POST" action="{{ url_for('dashboard.edit_habit', habit_id=habit._id) }}">
       <label for="name">Habit name</label>
       <input
@@ -37,7 +40,53 @@
       <label for="notes">Notes (optional)</label>
       <textarea id="notes" name="notes">{{ habit.notes if habit.notes else '' }}</textarea>
 
-      <label for="type">Type</label>
+      <label for="schedule_type">Occurrence</label>
+      <select name="schedule_type" id="schedule_type" onchange="toggleCustomDays()">
+        <option value="daily" {% if (sched.type or 'daily') == 'daily' %}selected{% endif %}>Daily</option>
+        <option value="weekly" {% if sched.type == 'weekly' %}selected{% endif %}>Weekly</option>
+        <option value="biweekly" {% if sched.type == 'biweekly' %}selected{% endif %}>Biweekly</option>
+        <option value="monthly" {% if sched.type == 'monthly' %}selected{% endif %}>Monthly</option>
+        <option value="custom" {% if sched.type == 'custom' %}selected{% endif %}>Custom</option>
+      </select>
+
+      <div id="custom-days" style="display:none; margin-top:10px;">
+        <div class="muted" style="margin-bottom:6px;">Pick days</div>
+        <label><input type="checkbox" name="custom_days" value="0" {% if sched.custom_days and 0 in sched.custom_days %}checked{% endif %}> Mon</label>
+        <label><input type="checkbox" name="custom_days" value="1" {% if sched.custom_days and 1 in sched.custom_days %}checked{% endif %}> Tue</label>
+        <label><input type="checkbox" name="custom_days" value="2" {% if sched.custom_days and 2 in sched.custom_days %}checked{% endif %}> Wed</label>
+        <label><input type="checkbox" name="custom_days" value="3" {% if sched.custom_days and 3 in sched.custom_days %}checked{% endif %}> Thu</label>
+        <label><input type="checkbox" name="custom_days" value="4" {% if sched.custom_days and 4 in sched.custom_days %}checked{% endif %}> Fri</label>
+        <label><input type="checkbox" name="custom_days" value="5" {% if sched.custom_days and 5 in sched.custom_days %}checked{% endif %}> Sat</label>
+        <label><input type="checkbox" name="custom_days" value="6" {% if sched.custom_days and 6 in sched.custom_days %}checked{% endif %}> Sun</label>
+      </div>
+
+      <label style="margin-top:12px;">Target</label>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input
+          type="number"
+          step="0.1"
+          name="goal_value"
+          placeholder="Value"
+          required
+          value="{{ goal.get('value', 1) }}"
+          style="flex:1; min-width:120px;"
+        >
+
+        <select name="goal_unit" style="flex:1; min-width:140px;">
+          <option value="times" {% if goal.get('unit', 'times') == 'times' %}selected{% endif %}>times</option>
+          <option value="minutes" {% if goal.get('unit') == 'minutes' %}selected{% endif %}>minutes</option>
+          <option value="pages" {% if goal.get('unit') == 'pages' %}selected{% endif %}>pages</option>
+          <option value="steps" {% if goal.get('unit') == 'steps' %}selected{% endif %}>steps</option>
+        </select>
+
+        <select name="goal_period" style="flex:1; min-width:140px;">
+          <option value="day" {% if goal.get('period', 'day') == 'day' %}selected{% endif %}>per day</option>
+          <option value="week" {% if goal.get('period') == 'week' %}selected{% endif %}>per week</option>
+          <option value="month" {% if goal.get('period') == 'month' %}selected{% endif %}>per month</option>
+        </select>
+      </div>
+
+      <label for="type" style="margin-top:12px;">Type</label>
       <select name="type" id="type" onchange="toggleCountFields()">
         <option value="binary" {% if (habit.type or 'binary') == 'binary' %}selected{% endif %}>Checkbox (done or not)</option>
         <option value="count" {% if habit.type == 'count' %}selected{% endif %}>Count / Amount</option>
@@ -53,7 +102,7 @@
           value="{{ habit.unit if habit.unit else '' }}"
         >
 
-        <label for="target">Target</label>
+        <label for="target">Legacy target</label>
         <input
           id="target"
           type="number"
@@ -78,7 +127,14 @@
         const type = document.getElementById('type').value;
         document.getElementById('count-fields').style.display = (type === 'count') ? 'block' : 'none';
       }
+
+      function toggleCustomDays() {
+        const scheduleType = document.getElementById('schedule_type').value;
+        document.getElementById('custom-days').style.display = (scheduleType === 'custom') ? 'block' : 'none';
+      }
+
       toggleCountFields();
+      toggleCustomDays();
     </script>
   </div>
 </body>
