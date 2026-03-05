@@ -29,25 +29,87 @@ habit_collections = db["habits"]
 completions_collection = db["completions"]
 users_collection = db["users"]
 
+def parse_int(value, default=None):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
 
-#Dashboard view
+def parse_float(value, default=None):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+def should_show_today(habit, today_dt):
+    schedule = habit.get("schedule") or {}
+    schedule_type = schedule.get("type", habit.get("frequency", "daily"))
+
+    if schedule_type == "daily":
+        return True
+
+    if schedule_type in {"weekly", "biweekly"}:
+        interval = 7 if schedule_type == "weekly" else 14
+        start_str = schedule.get("start_date")
+
+        if not start_str:
+            created = habit.get("createdAt")
+            if created and hasattr(created, "strftime"):
+                start_str = created.strftime("%Y-%m-%d")
+
+        if not start_str:
+            return True
+
+        try:
+            start_dt = datetime.strptime(start_str, "%Y-%m-%d").date()
+        except Exception:
+            return True
+
+        delta = (today_dt - start_dt).days
+        return delta >= 0 and (delta % interval == 0)
+
+    if schedule_type == "monthly":
+        start_str = schedule.get("start_date")
+        if not start_str:
+            created = habit.get("createdAt")
+            if created and hasattr(created, "strftime"):
+                start_str = created.strftime("%Y-%m-%d")
+
+        day = 1
+        if start_str:
+            try:
+                start_dt = datetime.strptime(start_str, "%Y-%m-%d").date()
+                day = start_dt.day
+            except Exception:
+                day = 1
+
+        return today_dt.day == day
+
+    if schedule_type == "custom":
+        days = schedule.get("custom_days") or []
+        return today_dt.weekday() in set(days)
+
+    return True
+
+
 @dashboard_bp.route("/dashboard")
 @login_required
 def dashboard():
-    """
-    Displays today's habits for the logged in user.
-    """
     user_id = str(current_user.id)
+    today_str = today_str_local()
+    today_dt = datetime.now(ZoneInfo("America/New_York")).date()
 
     habits = list(habit_collections.find({
         "userId": user_id,
         "archived": {"$ne": True}
     }))
 
-    today_str = today_str_local()
-
+    due_habits = []
     for habit in habits:
         habit["_id"] = str(habit["_id"])
+
+        if not should_show_today(habit, today_dt):
+            continue
 
         completion = completions_collection.find_one({
             "habitId": habit["_id"],
@@ -58,7 +120,18 @@ def dashboard():
         habit["completed_today"] = completion is not None
         habit["streak"] = calculate_streak(habit["_id"], user_id)
 
-    return render_template("dashboard.html", habits=habits, today_str=today_str)
+        due_habits.append(habit)
+
+    done_habits = [h for h in due_habits if h.get("completed_today")]
+    not_done_habits = [h for h in due_habits if not h.get("completed_today")]
+
+    return render_template(
+        "dashboard.html",
+        habits=due_habits,
+        done_habits=done_habits,
+        not_done_habits=not_done_habits,
+        today_str=today_str
+    )
 
 
 @dashboard_bp.route("/habits/new", methods=["GET"])
@@ -74,54 +147,95 @@ def add_habit_page():
 @login_required
 def create_habit():
     """
-    Allows the user to create new habits
+    Allow user to create habits
     """
     data = request.form
+    user_id = str(current_user.id)
 
     name = (data.get("name") or "").strip()
     category = (data.get("category") or "").strip()
     notes = (data.get("notes") or "").strip()
 
+    schedule_type = (data.get("schedule_type") or "daily").strip()
+    custom_days_raw = data.getlist("custom_days")
+    custom_days = [d for d in (parse_int(x, None) for x in custom_days_raw) if d is not None]
+
+    if schedule_type not in {"daily", "weekly", "biweekly", "monthly", "custom"}:
+        schedule_type = "daily"
+
+    if schedule_type == "custom" and not custom_days:
+        custom_days = [0, 1, 2, 3, 4]
+
+    schedule_doc = {
+        "type": schedule_type,
+        "start_date": today_str_local()
+    }
+    if schedule_type == "custom":
+        schedule_doc["custom_days"] = sorted(list(set(custom_days)))
+
+    goal_value_raw = (data.get("goal_value") or "").strip()
+    goal_unit = (data.get("goal_unit") or "times").strip()
+    goal_period = (data.get("goal_period") or "day").strip()
+
+    if goal_period not in {"day", "week", "month"}:
+        goal_period = "day"
+
+    goal_value = parse_float(goal_value_raw, None)
+    if goal_value is None:
+        goal_value = parse_float((data.get("target") or "").strip(), None)
+
+    if goal_value is None:
+        goal_value = 1
+
+    if goal_value <= 0:
+        return render_template("addhabits.html", error="Goal must be > 0", form=data)
+
+    goal_doc = {
+        "value": goal_value,
+        "unit": goal_unit,
+        "period": goal_period
+    }
+
     habit_type = (data.get("type") or "binary").strip()
-    unit = (data.get("unit") or "").strip()
-    target_raw = (data.get("target") or "").strip()
+    unit_legacy = (data.get("unit") or "").strip()
+    target_legacy = parse_float((data.get("target") or "").strip(), None)
 
     if not name:
         return render_template("addhabits.html", error="Name is required", form=data)
 
     if habit_type not in {"binary", "count"}:
-        return render_template("addhabits.html", error="Invalid habit type", form=data)
+        habit_type = "binary"
 
-    target = None
     if habit_type == "count":
-        if not unit:
+        if not unit_legacy:
             return render_template("addhabits.html", error="Unit required for count", form=data)
-        if not target_raw:
+        if target_legacy is None:
             return render_template("addhabits.html", error="Target required for count", form=data)
-        try:
-            target = float(target_raw)
-        except ValueError:
-            return render_template("addhabits.html", error="Target must be a number", form=data)
-        if target <= 0:
-            return render_template("addhabits.html", error="Target must be > zero", form=data)
+        if target_legacy <= 0:
+            return render_template("addhabits.html", error="Target must be > 0", form=data)
 
     new_habit = {
-        "userId": str(current_user.id),
+        "userId": user_id,
         "name": name,
-        "frequency": "daily",
+
+        "schedule": schedule_doc,
+        "goal": goal_doc,
+
+        "frequency": schedule_type,
         "type": habit_type,
         "category": category if category else None,
         "notes": notes if notes else None,
-        "unit": unit if habit_type == "count" else None,
-        "target": target if habit_type == "count" else None,
+        "unit": unit_legacy if habit_type == "count" else None,
+        "target": target_legacy if habit_type == "count" else None,
+
         "createdAt": datetime.utcnow(),
         "updatedAt": datetime.utcnow(),
         "archived": False,
     }
 
     new_habit = {k: v for k, v in new_habit.items() if v is not None}
-
     habit_collections.insert_one(new_habit)
+
     return redirect(url_for("dashboard.create_habit_get"))
 
 
@@ -168,15 +282,23 @@ def create_habit_get():
     for h in habits:
         h["_id"] = str(h["_id"])
 
+        if "schedule" not in h:
+            h["schedule"] = {"type": h.get("frequency", "daily"), "start_date": today_str_local()}
+        if "goal" not in h:
+            if h.get("type") == "count" and h.get("target") is not None:
+                h["goal"] = {"value": h.get("target"), "unit": h.get("unit") or "times", "period": "day"}
+            else:
+                h["goal"] = {"value": 1, "unit": "times", "period": "day"}
+
     return render_template("habits.html", habits=habits)
 
 
 @dashboard_bp.route("/edithabit/<habit_id>", methods=["GET", "POST"])
 @login_required
 def edit_habit(habit_id):
-    """
+    '''
     Allows the user to edit their habits
-    """
+    '''
     user_id = str(current_user.id)
 
     try:
@@ -194,6 +316,41 @@ def edit_habit(habit_id):
         name = (data.get("name") or "").strip()
         category = (data.get("category") or "").strip()
         notes = (data.get("notes") or "").strip()
+
+        schedule_type = (data.get("schedule_type") or (habit.get("schedule") or {}).get("type") or "daily").strip()
+        custom_days_raw = data.getlist("custom_days")
+        custom_days = [d for d in (parse_int(x, None) for x in custom_days_raw) if d is not None]
+
+        if schedule_type not in {"daily", "weekly", "biweekly", "monthly", "custom"}:
+            schedule_type = "daily"
+
+        schedule_doc = habit.get("schedule") or {}
+        schedule_doc["type"] = schedule_type
+        schedule_doc.setdefault("start_date", today_str_local())
+
+        if schedule_type == "custom":
+            schedule_doc["custom_days"] = sorted(list(set(custom_days)))
+        else:
+            schedule_doc.pop("custom_days", None)
+
+        goal_value_raw = (data.get("goal_value") or "").strip()
+        goal_unit = (data.get("goal_unit") or "times").strip()
+        goal_period = (data.get("goal_period") or "day").strip()
+
+        if goal_period not in {"day", "week", "month"}:
+            goal_period = "day"
+
+        goal_value = parse_float(goal_value_raw, None)
+        if goal_value is None:
+            goal_value = parse_float((data.get("target") or "").strip(), None)
+        if goal_value is None:
+            goal_value = 1
+        if goal_value <= 0:
+            habit["_id"] = str(habit["_id"])
+            habit["type"] = habit.get("type", "binary")
+            return render_template("edithabit.html", habit=habit, error="Goal must be > 0")
+
+        goal_doc = {"value": goal_value, "unit": goal_unit, "period": goal_period}
 
         habit_type = (data.get("type") or "binary").strip()
         unit = (data.get("unit") or "").strip()
@@ -214,25 +371,27 @@ def edit_habit(habit_id):
             if not unit:
                 habit["_id"] = str(habit["_id"])
                 habit["type"] = habit.get("type", "binary")
-                return render_template("edithabit.html", habit=habit, error="Required for count")
+                return render_template("edithabit.html", habit=habit, error="Unit required for count")
             if not target_raw:
                 habit["_id"] = str(habit["_id"])
                 habit["type"] = habit.get("type", "binary")
-                return render_template("edithabit.html", habit=habit, error="Target required count")
+                return render_template("edithabit.html", habit=habit, error="Target required for count")
             try:
                 target = float(target_raw)
             except ValueError:
                 habit["_id"] = str(habit["_id"])
                 habit["type"] = habit.get("type", "binary")
-                return render_template("edithabit.html", habit=habit, error="Target must be a num")
+                return render_template("edithabit.html", habit=habit, error="Target must be a number")
             if target <= 0:
                 habit["_id"] = str(habit["_id"])
                 habit["type"] = habit.get("type", "binary")
-                return render_template("edithabit.html", habit=habit, error="Target must be > zero")
+                return render_template("edithabit.html", habit=habit, error="Target must be > 0")
 
         set_fields = {
             "name": name,
             "type": habit_type,
+            "schedule": schedule_doc,
+            "goal": goal_doc,
             "updatedAt": datetime.utcnow(),
         }
 
@@ -260,11 +419,16 @@ def edit_habit(habit_id):
             update_doc["$unset"] = unset_fields
 
         habit_collections.update_one({"_id": oid, "userId": user_id}, update_doc)
-
         return redirect(url_for("dashboard.create_habit_get"))
 
     habit["_id"] = str(habit["_id"])
     habit["type"] = habit.get("type", "binary")
+
+    if "schedule" not in habit:
+        habit["schedule"] = {"type": habit.get("frequency", "daily"), "start_date": today_str_local()}
+    if "goal" not in habit:
+        habit["goal"] = {"value": 1, "unit": "times", "period": "day"}
+
     return render_template("edithabit.html", habit=habit)
 
 

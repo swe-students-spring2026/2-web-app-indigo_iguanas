@@ -9,19 +9,16 @@
 
 <body>
   <div class="dashboard-wrapper">
-
-    
-
     <div class="page-header">
       <h1 class="page-title">View Habits</h1>
-      
+
       <div class="search-row">
         <form method="GET" action="{{ url_for('dashboard.search_habits') }}" style="width:100%; display:flex; gap:10px;">
           <input
             class="search-input"
             type="text"
-            name="q"  
-            value="{{ request.args.get('q','') }}"  
+            name="q"
+            value="{{ request.args.get('q','') }}"
             placeholder="Search habits by name..."
             aria-label="Search habits"
           >
@@ -51,18 +48,34 @@
                     <div class="muted">{{ habit.notes }}</div>
                   {% endif %}
 
-                  {% set habit_type = habit.type if habit.type else 'binary' %}
+                  {% set sched = habit.schedule if habit.schedule else {'type': habit.frequency if habit.frequency else 'daily'} %}
+                  {% set goal = habit.goal if habit.goal else {} %}
 
-                  {% if habit_type == 'count' %}
-                    <div><strong>Goal:</strong> Count</div>
-                    {% if habit.target %}
-                      <div class="muted">
-                        Target: {{ habit.target }}{% if habit.unit %} {{ habit.unit }}{% endif %}
-                      </div>
+                  <div class="muted">
+                    <strong>Occurrence:</strong>
+                    {% if sched.type == 'custom' %}
+                      Custom
+                      {% if sched.custom_days %}
+                        (
+                        {% for d in sched.custom_days %}
+                          {% if d == 0 %}Mon{% elif d == 1 %}Tue{% elif d == 2 %}Wed{% elif d == 3 %}Thu{% elif d == 4 %}Fri{% elif d == 5 %}Sat{% elif d == 6 %}Sun{% endif %}
+                          {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                        )
+                      {% endif %}
+                    {% elif sched.type %}
+                      {{ sched.type|capitalize }}
+                    {% else %}
+                      Daily
                     {% endif %}
-                  {% else %}
-                    <div><strong>Goal:</strong> Done / Not done</div>
-                  {% endif %}
+                  </div>
+
+                  <div class="muted">
+                    <strong>Target:</strong>
+                    {{ goal.get('value', 1) }}
+                    {{ goal.get('unit', 'times') }}
+                    per {{ goal.get('period', 'day') }}
+                </div>
                 </div>
               </div>
 
