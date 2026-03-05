@@ -61,6 +61,13 @@ python3 app.py
 ### 6. Getting Started
 ```
 You can login or register for your account, and start logging habits! 
+
+Here are some test accounts:
+Username: admin
+Password: 12345678
+
+Username: rohan
+Password: rohan
 ```
 
 
