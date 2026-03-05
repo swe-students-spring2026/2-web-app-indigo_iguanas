@@ -18,6 +18,7 @@ body{
     display: flex;
     justify-content: center;
     align-items: center;  
+    flex-direction: column;
 }
 
 .container{
@@ -347,6 +348,14 @@ li form{
 
 .row-actions form{
     margin:0;
+}
+
+.top-button{
+    width: 100%;
+    max-width: 600px;
+    display: flex;
+    justify-content: flex-end;
+    margin: 10px;
 }
 
 @media (max-width: 400px){
