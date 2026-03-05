@@ -25,6 +25,9 @@
           <button type="submit" class="primary-button smallbutton" style="width:auto">
             Search
           </button>
+
+          <a href="{{ url_for('dashboard.create_habit_get') }}" class="logout-link">Clear search</a>
+          
         </form>
       </div>
     </div>
@@ -45,7 +48,7 @@
 
                 <div class="habit-meta">
                   {% if habit.notes %}
-                    <div class="muted">{{ habit.notes }}</div>
+                    <div class="muted"><strong>Description:</strong> {{ habit.notes }}</div>
                   {% endif %}
 
                   {% set sched = habit.schedule if habit.schedule else {'type': habit.frequency if habit.frequency else 'daily'} %}
@@ -117,7 +120,6 @@
 
     <div class="bottom-actions">
       <a href="{{ url_for('dashboard.add_habit_page') }}" class="primary-button">Add Habit</a>
-      <a href="{{ url_for('dashboard.create_habit_get') }}" class="logout-link">Clear search</a>
       <a href="{{ url_for('dashboard.dashboard') }}" class="logout-link">Back to Dashboard</a>
     </div>
 

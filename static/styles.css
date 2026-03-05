@@ -247,6 +247,10 @@ li form{
     gap:12px;
 }
 
+.habit-top > div:first-child{
+    flex:1;
+}
+
 .habit-title-row{
     display:flex;
     flex-wrap:wrap;
@@ -288,6 +292,26 @@ li form{
   padding:6px 12px;
   border-radius:10px;
   display:inline-block;
+}
+
+.habit-card-actions{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    min-width:120px;
+    align-items:stretch;
+}
+
+.habit-card-actions form{
+    margin:0;
+    width:100%;
+    display:block;
+}
+
+.habit-card-actions .small-button,
+.habit-card-actions button{
+    width:100%;
+    white-space:nowrap;
 }
 
 .bottom-actions{
