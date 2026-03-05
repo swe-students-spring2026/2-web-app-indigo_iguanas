@@ -2,8 +2,8 @@
 
 [Kyle Chen](https://github.com/KyleC55)<br>
 [Jaiden Xu](https://github.com/jbx202)<br>
-[]()<br>
-[]()<br>
+[Rohan Malhotra]()<br>
+[Ani Guduru]()<br>
 []()<br>
 
 
