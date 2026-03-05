@@ -66,5 +66,9 @@ You can login or register for your account, and start logging habits!
 
 ## Task boards 
 
-[Task Board](https://github.com/orgs/swe-students-spring2026/projects/8)<br>
-Link To Task Board: https://github.com/orgs/swe-students-spring2026/projects/8<br>
+[Task Board For Sprint 1](https://github.com/orgs/swe-students-spring2026/projects/8)<br>
+Link To Task Board For Sprint 1: https://github.com/orgs/swe-students-spring2026/projects/8<br>
+
+
+[Task Board For Sprint 2](https://github.com/orgs/swe-students-spring2026/projects/53)<br>
+Link To Task Board For Sprint 2: https://github.com/orgs/swe-students-spring2026/projects/53<br>
