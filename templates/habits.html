@@ -75,17 +75,33 @@
                     {{ goal.get('value', 1) }}
                     {{ goal.get('unit', 'times') }}
                     per {{ goal.get('period', 'day') }}
-                </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="habit-actions">
+              <div class="habit-actions" style="display:flex; gap:10px; align-items:center;">
                 <a
                   href="{{ url_for('dashboard.edit_habit', habit_id=habit._id) }}"
                   class="primary-button small-button"
                 >
                   Edit
                 </a>
+                
+
+                <form
+                  method="POST"
+                  action="{{ url_for('dashboard.delete_habit', habit_id=habit._id) }}"
+                  style="margin:0;"
+                >
+                <button 
+                  type="submit" 
+                  class="primary-button small-button"
+                  style="background:#e74c3c;"
+                  onclick="return confirm('Delete this habit? This cannot be undone.')"
+                >
+                  Delete
+                </button>
+                </form>
               </div>
             </div>
           </li>
