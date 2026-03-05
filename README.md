@@ -24,14 +24,44 @@ Link To Task Board: https://github.com/orgs/swe-students-spring2026/projects/73 
 ## Steps necessary to run the software
 
 ### 1. Clone the Repository
+```
 Open The Terminal:
 git clone https://github.com/swe-students-spring2026/2-web-app-indigo_iguanas.git
 cd 2-web-app-indigo_iguanas
+```
 
-### 2. Install Python
+### 2. Install Python (Skip if installed)
+```
 Make sure Python 3.10 or higher is installed.
 Verify by running:
 python3 --version
+```
+
+### 3. Installing the Dependencies
+```
+Run in your terminal python3 -m pip install --user -r requirements.txt
+```
+
+### 4. Configure the Environment 
+```
+Option A:
+cp .env.example .env
+nano .env
+use the credentials we provided you, then you save and exit.
+
+Option B:
+Manually add the .env and paste the configuration we gave you
+```
+
+### 5. Run the App
+```
+python3 app.py
+```
+
+### 6. Getting Started
+```
+You can login or register for your account, and start logging habits! 
+```
 
 
 ## Task boards 
