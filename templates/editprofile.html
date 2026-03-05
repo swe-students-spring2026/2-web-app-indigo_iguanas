@@ -1,47 +1,82 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Edit Profile</title>
 
-  <style>
-    body { font-family: Arial, sans-serif; background:#f4f6f8; margin:0; padding:0; }
-    .container { max-width:600px; margin:60px auto; background:#fff; padding:30px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-    h1 { margin:0 0 16px; }
-    label { display:block; font-weight:bold; color:#555; margin-top:14px; }
-    input { width:100%; padding:10px; margin-top:6px; border:1px solid #ddd; border-radius:6px; box-sizing: border-box; }
-    .row { display:flex; gap:10px; margin-top:20px; }
-    button { padding:10px 16px; border:none; border-radius:5px; cursor:pointer; width:100%; }
-    .save { background:#4CAF50; color:#fff; }
-    .cancel { background:#e0e0e0; }
-    .error { color:#e74c3c; margin:10px 0; }
-    .full { width:100%; }
-    .link-btn { width:100%; text-decoration:none; }
-  </style>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Profile</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 
 <body>
-  <div class="container">
+  <div class="dashboard-wrapper">
     <h1>Edit Profile</h1>
 
     {% if error %}
-      <div class="error">{{ error }}</div>
+      <p class="error">{{ error }}</p>
     {% endif %}
 
     <form method="POST" action="{{ url_for('edit_profile') }}">
-      <label for="username">Username</label>
-      <input id="username" name="username" value="{{ user.get('username','') }}" />
+      <ul class="habit-list">
+        <li class="habit-card">
+          <label for="username"><strong>Username</strong></label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            class="search-input"
+            value="{{ user.get('username','') }}"
+            placeholder="Enter a username"
+          />
 
-      <label for="email">Email</label>
-      <input id="email" name="email" value="{{ user.get('email','') }}" />
+          <label for="email" style="margin-top:12px;"><strong>Email</strong></label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            class="search-input"
+            value="{{ user.get('email','') }}"
+            placeholder="Enter your email"
+          />
+        </li>
+      </ul>
 
-      <div class="row">
-        <button class="save" type="submit">Save</button>
+      <h2>Change Password</h2>
+      <ul class="habit-list">
+        <li class="habit-card">
+          <label for="current_password"><strong>Current Password</strong></label>
+          <input
+            id="current_password"
+            name="current_password"
+            type="password"
+            class="search-input"
+            placeholder="Current password"
+          />
 
-        <a class="link-btn" href="{{ url_for('profile') }}">
-          <button class="cancel" type="button">Cancel</button>
-        </a>
+          <label for="new_password" style="margin-top:12px;"><strong>New Password</strong></label>
+          <input
+            id="new_password"
+            name="new_password"
+            type="password"
+            class="search-input"
+            placeholder="New password"
+          />
+
+          <label for="confirm_password" style="margin-top:12px;"><strong>Confirm New Password</strong></label>
+          <input
+            id="confirm_password"
+            name="confirm_password"
+            type="password"
+            class="search-input"
+            placeholder="Confirm new password"
+          />
+        </li>
+      </ul>
+
+      <div class="bottom-actions">
+        <button type="submit" class="primary-button">Save Changes</button>
+        <a href="{{ url_for('profile') }}" class="logout-link">Cancel</a>
       </div>
     </form>
   </div>
