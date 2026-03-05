@@ -9,16 +9,29 @@
 </head>
 
 <body>
+    <div class="top-button">
+        <a href="{{ url_for('profile') }}" style="text-decoration:none;">
+            <button style="
+                padding:8px 14px;
+                border:none;
+                border-radius:6px;
+                background:#f0f2f5;
+                font-weight:bold;
+                cursor:pointer;
+            ">
+                👤 {{ current_user.username }}
+            </button>
+        </a>
+    </div>
     <div class="dashboard-wrapper">
     <h1>Welcome to MicroHabit Dashboard</h1>
 
     <div class="habit-actions">
       <a href="{{ url_for('dashboard.add_habit_page') }}" class="primary-button">Add Habit</a>
       <a href="{{ url_for('dashboard.create_habit_get') }}" class="primary-button">View Habits</a>
-      <a href="{{ url_for('dashboard.profile') }}" class=""primary-button>Profile</a>
     </div>
 
-   <h2>Habit List</h2>
+   <h2>Recent Habits</h2>
 
 
      {% if habits %}
@@ -28,19 +41,26 @@
                 <span class="habit-name">{{ habit.name }}</span>
 
                 <form class="complete-form" method="POST" action="{{ url_for('dashboard.toggle_habit', habit_id=habit._id) }}">
+                <input type="hidden" name="next" value="{{ request.path }}">
                 <button type="submit" class="primary-button small-button complete_btn">
-                    {% if habit.completed_today %}
-                    Incomplete
-                    {% else %} 
-                    Complete
-                    {% endif %}
+                    Complete +1
                 </button>
             </form>
 
             <div class="streak-group">
                 <span class="streak-text">Streak: {{ habit.streak }}</span>
                 {% if today_str %}
-                <span class="muted">Today: {{today_str}}</span>
+                <span class="muted"><strong>Today:</strong> {{today_str}}</span>
+                {% endif %}
+                {% if habit.window_start and habit.window_end %}
+                <span class="muted"><strong>Completed:</strong>
+                    {% if habit.window_completed >= habit.window_required %}
+                    Completed
+                    {% else %}
+                    {{ habit.window_completed }}/{{ habit.window_required }}
+                    {% endif %}
+                </span>
+                <span class="muted"><strong>Time Frame:</strong> {{ habit.window_start }} and {{ habit.window_end }}</span>
                 {% endif %}
             </div>
 

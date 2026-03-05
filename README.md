@@ -1,7 +1,7 @@
 ## Team members
 
 [Kyle Chen](https://github.com/KyleC55)<br>
-[]()<br>
+[Jaiden Xu](https://github.com/jbx202)<br>
 []()<br>
 []()<br>
 []()<br>
