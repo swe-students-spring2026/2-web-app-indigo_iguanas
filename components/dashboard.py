@@ -589,6 +589,7 @@ def search_habits():
     """
     user_id = str(current_user.id)
     query = (request.args.get("q") or "").strip()
+    today_str = today_str_local()
 
     mongo_query = {
         "userId": user_id,
@@ -602,6 +603,30 @@ def search_habits():
 
     for habit in habits:
         habit["_id"] = str(habit["_id"])
+
+        if "schedule" not in habit:
+            habit["schedule"] = {
+                "type": habit.get("frequency", "daily"),
+                "start_date": today_str_local(),
+            }
+
+        if "goal" not in habit:
+            if habit.get("type") == "count" and habit.get("target") is not None:
+                habit["goal"] = {
+                    "value": habit.get("target"),
+                    "unit": habit.get("unit") or "times",
+                    "period": "day",
+                }
+            else:
+                habit["goal"] = {"value": 1, "unit": "times", "period": "day"}
+
+        habit["completed_today_count"] = completions_collection.count_documents(
+            {
+                "habitId": habit["_id"],
+                "userId": user_id,
+                "date": today_str,
+            }
+        )
 
     return render_template("habits.html", habits=habits)
 
